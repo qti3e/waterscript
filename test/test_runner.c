@@ -111,8 +111,7 @@ int run_tests()
 }
 
 void tests() {
-        /*REG_TEST(wval_str);*/
-        /*REG_TEST(wval_obj);*/
+        REG_TEST(constant_pool);
 }
 
 int main()
