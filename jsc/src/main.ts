@@ -2,12 +2,15 @@ import { parse } from "acorn";
 import { gen } from "./gen";
 import { dump } from "./dump";
 
-function main() {
-  const node = parse("true && false");
-  const ret = gen(node as any);
-
-  console.log(JSON.stringify(node, null, 4));
-  console.log(dump(ret));
+export function compile(source: string): number[] {
+  const node = parse(source);
+  return gen(node as any);
 }
 
-main();
+function getEval() {
+  return eval;
+}
+
+const global = getEval()("this");
+global.compile = compile;
+global.dump = dump;
