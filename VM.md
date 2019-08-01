@@ -71,11 +71,23 @@ constant pool.
 
 ## Data Stack with Constant Pool
 
-| Hex  | Byte Code | Entry Type | Description                          |
-| ---- | --------- | ---------- | ------------------------------------ |
-| 0x40 | IProp     | String     | $($[CT])                             |
-| 0x41 | Load      | any wval   | \$(CT)                               |
-| 0x42 | Named     | String     | Push the variable `CT` to the stack. |
+| Hex  | Byte Code | Entry Type | Description                                |
+| ---- | --------- | ---------- | ------------------------------------------ |
+| 0x40 | NamedProp | String     | $($[CT])                                   |
+| 0x41 | Load      | any wval   | \$(CT)                                     |
+| 0x42 | Named     | String     | Push the variable `CT` to the stack.       |
+| 0x43 | Store     | String     | `CT` = `peek()`                            |
+| 0x44 | Var       | String     | Define `CT` in the current Function-scope. |
+| 0x45 | Let       | String     | Define `CT` in the current Block-scope.    |
+| 0x46 | Const     | String     | Define `CT` in the current Block-scope.    |
+| 0x47 | InitConst | String     | `CT` = \$                                  |
+
+> Note `Let` and `Const` sets the `lexical-declreation` flag to true.
+
+> Var stores value to the global object to.
+
+> `var`, `let` and `const` each correspond to their behaviour in the JavaScript
+> itself.
 
 ## Control Flow
 
@@ -187,6 +199,15 @@ if (!value) {
 </tr>
 
 </table>
+
+# Hoisting and Scoping
+
+| Hex  | Name       | Description                                   |
+| ---- | ---------- | --------------------------------------------- |
+| 0x90 | Ret        | Return from a function.                       |
+| 0x91 | FunctionIn | Push a new Function scope to the scope chain. |
+| 0x92 | BlockOut   | Pop the last Block scope on the scope chain.  |
+| 0x93 | BlockIn    | Push a new Block scope to the scope chain.    |
 
 ## TODO
 

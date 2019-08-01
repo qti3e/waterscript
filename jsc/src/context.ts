@@ -47,9 +47,14 @@ export enum ByteCode {
   InstanceOf = 0x2c,
   In = 0x2d,
   // Data Stack with Constant Pool
-  IProp = 0x40,
+  NamedProp = 0x40,
   Load = 0x41,
   Named = 0x42,
+  Store = 0x43,
+  Var = 0x44,
+  Let = 0x45,
+  Const = 0x46,
+  InitConst = 0x47,
   // Control Flow
   Jmp = 0x70,
   JmpTruePop = 0x71,
@@ -57,7 +62,12 @@ export enum ByteCode {
   JmpTruePeek = 0x73,
   JmpFalsePeek = 0x74,
   JmpTrueThenPop = 0x75,
-  JmpFalseThenPop = 0x76
+  JmpFalseThenPop = 0x76,
+  // Hoisting and Scoping
+  Ret = 0x90,
+  FunctionIn = 0x91,
+  BlockOut = 0x92,
+  BlockIn = 0x93
 }
 
 export class GenContext {
@@ -71,21 +81,13 @@ export class GenContext {
     return [...this.bytecodes];
   }
 
-  jmp(type: ByteCode): Jump {
+  jmp(type: ByteCode): () => void {
     this.bytecodes.push(type);
     this.bytecodes.push(-1);
-    return new Jump(this);
-  }
-}
+    const position = this.bytecodes.length - 1;
 
-export class Jump {
-  private position = 0;
-
-  constructor(private context: GenContext) {
-    this.position = context.bytecodes.length - 1;
-  }
-
-  here() {
-    this.context.bytecodes[this.position] = this.context.bytecodes.length;
+    return () => {
+      this.bytecodes[position] = this.bytecodes.length - 1;
+    };
   }
 }

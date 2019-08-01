@@ -1,5 +1,5 @@
 import * as estree from "estree";
-import { GenContext, ByteCode, Jump } from "./context";
+import { GenContext, ByteCode } from "./context";
 
 export function gen(program: estree.Program): number[] {
   if (program.type !== "Program") throw new Error("Invalid input node to gen");
@@ -17,8 +17,8 @@ export function gen(program: estree.Program): number[] {
 }
 
 function visit(context: GenContext, node: estree.Node): void {
-  let jmp1: Jump;
-  let jmp2: Jump;
+  let jmp1: () => void;
+  let jmp2: () => void;
 
   switch (node.type) {
     case "ExpressionStatement":
@@ -42,7 +42,7 @@ function visit(context: GenContext, node: estree.Node): void {
       );
       context.write(ByteCode.Pop);
       visit(context, node.right);
-      jmp1.here();
+      jmp1();
       break;
 
     case "Literal":
