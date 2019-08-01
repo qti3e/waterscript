@@ -61,7 +61,7 @@ export enum ByteCode {
 }
 
 export class GenContext {
-  private bytecodes: number[] = [];
+  readonly bytecodes: number[] = [];
 
   write(code: ByteCode): void {
     this.bytecodes.push(code);
@@ -69,5 +69,23 @@ export class GenContext {
 
   getBytecodes(): number[] {
     return [...this.bytecodes];
+  }
+
+  jmp(type: ByteCode): Jump {
+    this.bytecodes.push(type);
+    this.bytecodes.push(-1);
+    return new Jump(this);
+  }
+}
+
+export class Jump {
+  private position = 0;
+
+  constructor(private context: GenContext) {
+    this.position = context.bytecodes.length - 1;
+  }
+
+  here() {
+    this.context.bytecodes[this.position] = this.context.bytecodes.length;
   }
 }
