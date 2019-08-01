@@ -5,6 +5,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/acorn": "^4.0.5",
+    "@types/estree": "^0.0.39",
     "acorn": "^6.2.1",
     "rollup": "^1.17.0",
     "typescript": "^3.5.3"

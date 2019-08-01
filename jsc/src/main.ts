@@ -1,7 +1,13 @@
 import { parse } from "acorn";
+import { gen } from "./gen";
+import { dump } from "./dump";
 
 function main() {
-  console.log(JSON.stringify(parse('a + 1'), null, 4));
+  const node = parse("true + 0 * 1");
+  const ret = gen(node as any);
+
+  console.log(JSON.stringify(node, null, 4));
+  console.log(dump(ret));
 }
 
 main();
