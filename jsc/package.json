@@ -1,0 +1,12 @@
+{
+  "name": "jsc",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/acorn": "^4.0.5",
+    "acorn": "^6.2.1",
+    "rollup": "^1.17.0",
+    "typescript": "^3.5.3"
+  }
+}
