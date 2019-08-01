@@ -45,6 +45,7 @@ export enum ByteCode {
   Dup = 0x2a,
   Prop = 0x2b,
   InstanceOf = 0x2c,
+  In = 0x2d,
   // Data Stack with Constant Pool
   IProp = 0x40,
   Load = 0x41,

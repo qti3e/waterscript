@@ -67,6 +67,7 @@ constant pool.
 | 0x2a | Dup                       | \$($, $)       |
 | 0x2b | Prop                      | $($[$])        |
 | 0x2c | InstanceOf                | $ instanceof $ |
+| 0x2d | In                        | $ in $         |
 
 ## Data Stack with Constant Pool
 

@@ -133,8 +133,7 @@ function binaryOperator(
       context.write(ByteCode.InstanceOf);
       break;
     case "in":
-      // TODO(qti3e)
-      context.write(ByteCode.TODO);
+      context.write(ByteCode.In);
       break;
   }
 }
