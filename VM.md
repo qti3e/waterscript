@@ -9,7 +9,7 @@ We use `$(...)` to show a `push` and `$` for a `pop`, when there is a number
 after the `$` like `$2 = $1` it just shows the order of pop, the given example
 would produce the following code:
 
-```
+```js
 // $2 = $1
 value = pop();
 pointer = pop();
@@ -79,11 +79,114 @@ constant pool.
 
 ## Control Flow
 
-| Hex  | Byte Code | Argument Type (Optional) | Description                  |
-| ---- | --------- | ------------------------ | ---------------------------- |
-| 0x70 | Jmp       | unsigned int             | Move to `pos`.               |
-| 0x71 | JmpTrue   | unsigned int             | `$ is true`: Move to `pos`.  |
-| 0x72 | JmpFalse  | unsigned int             | `$ is false`: Move to `pos`. |
+<table>
+<thead>
+<tr>
+  <td><b>Hex</b></td>
+  <td><b>Name</b></td>
+  <td><b>Argument Type</b></td>
+  <td><b>Description</b></td>
+</tr>
+</thead>
+
+<tr>
+  <td>0x70</td>
+  <td>Jmp</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+cursor = arg;
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x71</td>
+  <td>JmpTruePop</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = pop();
+if (value) {
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x72</td>
+  <td>JmpFalsePop</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = pop();
+if (!value) {
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x73</td>
+  <td>JmpTruePeek</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = peek();
+if (value) {
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x74</td>
+  <td>JmpFalsePeek</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = peek();
+if (!value) {
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x75</td>
+  <td>JmpTrueThenPop</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = peek();
+if (value) {
+  pop();
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+<tr>
+  <td>0x76</td>
+  <td>JmpFalseThenPop</td>
+  <td>unsigned int</td>
+  <td>
+<pre lang="js">
+const value = peek();
+if (!value) {
+  pop();
+  cursor = arg;
+}
+</pre>
+  </td>
+</tr>
+
+</table>
 
 ## TODO
 

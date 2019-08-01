@@ -52,8 +52,12 @@ export enum ByteCode {
   Named = 0x42,
   // Control Flow
   Jmp = 0x70,
-  JmpTrue = 0x71,
-  JmpFalse = 0x72
+  JmpTruePop = 0x71,
+  JmpFalsePop = 0x72,
+  JmpTruePeek = 0x73,
+  JmpFalsePeek = 0x74,
+  JmpTrueThenPop = 0x75,
+  JmpFalseThenPop = 0x76
 }
 
 export class GenContext {

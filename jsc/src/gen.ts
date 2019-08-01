@@ -64,6 +64,7 @@ function visit(context: GenContext, node: estree.Node): void {
       break;
   }
 }
+
 function binaryOperator(
   context: GenContext,
   operator: estree.BinaryOperator
