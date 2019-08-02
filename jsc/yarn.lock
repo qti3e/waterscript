@@ -46,6 +46,11 @@ is-module@^1.0.0:
   resolved "https://registry.yarnpkg.com/is-module/-/is-module-1.0.0.tgz#3258fb69f78c14d5b815d664336b4cffb6441591"
   integrity sha1-Mlj7afeMFNW4FdZkM2tM/7ZEFZE=
 
+liltest@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/liltest/-/liltest-0.0.5.tgz#bf482e9889e125820b5327ef0e162d4cde354c46"
+  integrity sha1-v0gumInhJYILUyfvDhYtTN41TEY=
+
 path-parse@^1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.6.tgz#d62dbb5679405d72c4737ec58600e9ddcf06d24c"

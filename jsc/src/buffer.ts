@@ -5,7 +5,7 @@ type SingleByte = number;
 const textEncoder = new TextEncoder();
 
 // A buffer that dynamically resizes it self as we write to it.
-// Uses "Little Endian".
+// Uses "Big Endian".
 export class Buffer {
   private size: number;
   private buf: ArrayBuffer;
@@ -16,6 +16,10 @@ export class Buffer {
     this.size = Math.max(1, initialSize);
     this.buf = new ArrayBuffer(this.size);
     this.view = new Uint8Array(this.buf);
+  }
+
+  getSize(): number {
+    return this.size;
   }
 
   getBuffer(): ArrayBuffer {
@@ -34,8 +38,8 @@ export class Buffer {
     return new Uint8Array(this.getSlicedBuffer());
   }
 
-  private expand(): void {
-    const size = this.size * 2;
+  private expand(requiredSize: number): void {
+    const size = 2 ** Math.ceil(Math.log2(requiredSize));
     const newBuf = new ArrayBuffer(size);
     const newView = new Uint8Array(newBuf);
     newView.set(this.view);
@@ -47,7 +51,7 @@ export class Buffer {
 
   private resizeOnWrite(count: number): void {
     if (this.cursor + count > this.size) {
-      this.expand();
+      this.expand(this.cursor + count);
     }
   }
 
@@ -82,13 +86,13 @@ export class Buffer {
 
   writeFloat32(value: number): void {
     this.resizeOnWrite(4);
-    writeFloat(this.view, this.cursor, value, true, 23, 4);
+    writeFloat(this.view, this.cursor, value, false, 23, 4);
     this.cursor += 4;
   }
 
   writeFloat64(value: number): void {
     this.resizeOnWrite(8);
-    writeFloat(this.view, this.cursor, value, true, 52, 8);
+    writeFloat(this.view, this.cursor, value, false, 52, 8);
     this.cursor += 8;
   }
 }
