@@ -10,7 +10,7 @@ export class Buffer {
   private size: number;
   private buf: ArrayBuffer;
   private view: Uint8Array;
-  private cursor: number = 0;
+  private headOffset: number = 0;
 
   constructor(initialSize = 256) {
     this.size = Math.max(1, initialSize);
@@ -31,7 +31,7 @@ export class Buffer {
   }
 
   getSlicedBuffer(): ArrayBuffer {
-    return this.buf.slice(0, this.cursor);
+    return this.buf.slice(0, this.headOffset);
   }
 
   getSlicedUint8Array(): Uint8Array {
@@ -49,51 +49,83 @@ export class Buffer {
     this.view = newView;
   }
 
-  private resizeOnWrite(count: number): void {
-    if (this.cursor + count > this.size) {
-      this.expand(this.cursor + count);
+  private resizeOnWrite(cursor: number, count: number): void {
+    if (cursor + count > this.size) {
+      this.expand(cursor + count);
     }
   }
 
-  put(data: SingleByte): void {
-    this.resizeOnWrite(1);
-    this.view[this.cursor++] = data;
+  put(data: SingleByte, cursor = this.headOffset): void {
+    this.resizeOnWrite(cursor, 1);
+    this.view[cursor] = data;
+
+    if (arguments.length == 1) {
+      this.headOffset++;
+    }
   }
 
-  writeUint16(value: number): void {
-    this.resizeOnWrite(2);
-    this.view[this.cursor + 1] = value & 0xff;
-    this.view[this.cursor] = (value >>> 8) & 0xff;
-    this.cursor += 2;
+  writeUint16(value: number, cursor = this.headOffset): void {
+    this.resizeOnWrite(cursor, 2);
+    this.view[cursor + 1] = value & 0xff;
+    this.view[cursor] = (value >>> 8) & 0xff;
+
+    if (arguments.length == 1) {
+      this.headOffset += 2;
+    }
   }
 
-  writeUint32(value: number): void {
-    this.resizeOnWrite(4);
-    this.view[this.cursor + 3] = value & 0xff;
-    this.view[this.cursor + 2] = (value >>> 8) & 0xff;
-    this.view[this.cursor + 1] = (value >>> 16) & 0xff;
-    this.view[this.cursor + 0] = (value >>> 24) & 0xff;
-    this.cursor += 4;
+  writeUint32(value: number, cursor = this.headOffset): void {
+    this.resizeOnWrite(cursor, 4);
+    this.view[cursor + 3] = value & 0xff;
+    this.view[cursor + 2] = (value >>> 8) & 0xff;
+    this.view[cursor + 1] = (value >>> 16) & 0xff;
+    this.view[cursor + 0] = (value >>> 24) & 0xff;
+
+    if (arguments.length == 1) {
+      this.headOffset += 4;
+    }
   }
 
-  writeInt16(value: number): void {
+  writeInt16(value: number, cursor = this.headOffset): void {
+    if (arguments.length == 2) {
+      return this.writeUint16(value < 0 ? value | 0x10000 : value, cursor);
+    }
     this.writeUint16(value < 0 ? value | 0x10000 : value);
   }
 
-  writeInt32(value: number): void {
+  writeInt32(value: number, cursor = this.headOffset): void {
+    if (arguments.length == 2) {
+      return this.writeUint16(value < 0 ? value | 0x10000 : value, cursor);
+    }
     this.writeUint32(value < 0 ? value | 0x100000000 : value);
   }
 
-  writeFloat32(value: number): void {
-    this.resizeOnWrite(4);
-    writeFloat(this.view, this.cursor, value, false, 23, 4);
-    this.cursor += 4;
+  writeFloat32(value: number, cursor = this.headOffset): void {
+    this.resizeOnWrite(cursor, 4);
+    writeFloat(this.view, cursor, value, false, 23, 4);
+
+    if (arguments.length == 1) {
+      this.headOffset += 4;
+    }
   }
 
-  writeFloat64(value: number): void {
-    this.resizeOnWrite(8);
-    writeFloat(this.view, this.cursor, value, false, 52, 8);
-    this.cursor += 8;
+  writeFloat64(value: number, cursor = this.headOffset): void {
+    this.resizeOnWrite(cursor, 8);
+    writeFloat(this.view, cursor, value, false, 52, 8);
+    if (arguments.length == 1) {
+      this.headOffset += 8;
+    }
+  }
+
+  getCursor() {
+    return this.headOffset;
+  }
+
+  skip(bytes: number): number {
+    const index = this.headOffset;
+    this.resizeOnWrite(this.headOffset, bytes);
+    this.headOffset += bytes;
+    return index;
   }
 }
 

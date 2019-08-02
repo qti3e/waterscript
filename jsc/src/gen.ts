@@ -1,8 +1,8 @@
 import * as estree from "estree";
 import { ByteCode } from "./bytecode";
-import { Writer, Jump } from "./writer";
+import { Writer, Jump, CompiledData } from "./writer";
 
-export function gen(program: estree.Program): number[] {
+export function gen(program: estree.Program): CompiledData {
   if (program.type !== "Program") throw new Error("Invalid input node to gen");
 
   const writer = new Writer();

@@ -1,4 +1,5 @@
 import { ByteCode } from "./bytecode";
+import { Buffer } from "./buffer";
 
 export type JumpByteCode =
   | ByteCode.Jmp
@@ -9,27 +10,26 @@ export type JumpByteCode =
   | ByteCode.JmpTruePop
   | ByteCode.JmpTrueThenPop;
 
-export type CompiledData = number[];
+export type CompiledData = ArrayBuffer;
 
 export class Writer {
-  readonly data: CompiledData = [];
+  readonly data: Buffer = new Buffer();
 
   write(code: ByteCode): void {
-    this.data.push(code);
+    this.data.put(code);
   }
 
   getData(): CompiledData {
-    return [...this.data];
+    return this.data.getSlicedBuffer();
   }
 
   jmp(type: JumpByteCode): Jump {
-    this.data.push(type);
-    this.data.push(-1);
-    const position = this.data.length - 1;
+    this.data.put(type);
+    const position = this.data.skip(2);
 
     return {
       here: () => {
-        this.data[position] = this.data.length - 1;
+        this.data.writeInt16(this.data.getCursor() - 1, position);
       }
     };
   }

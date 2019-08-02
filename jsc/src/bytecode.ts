@@ -69,3 +69,21 @@ export enum ByteCode {
   BlockOut = 0x92,
   BlockIn = 0x93
 }
+
+export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
+  [ByteCode.Jmp]: 2,
+  [ByteCode.JmpTruePop]: 2,
+  [ByteCode.JmpFalsePop]: 2,
+  [ByteCode.JmpTruePeek]: 2,
+  [ByteCode.JmpFalsePeek]: 2,
+  [ByteCode.JmpTrueThenPop]: 2,
+  [ByteCode.JmpFalseThenPop]: 2,
+  [ByteCode.NamedProp]: 4,
+  [ByteCode.Load]: 4,
+  [ByteCode.Named]: 4,
+  [ByteCode.Store]: 4,
+  [ByteCode.Var]: 4,
+  [ByteCode.Let]: 4,
+  [ByteCode.Const]: 4,
+  [ByteCode.InitConst]: 4
+};
