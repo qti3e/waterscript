@@ -298,3 +298,64 @@ test(function bufferWriteFloat32() {
     ]
   );
 });
+
+test(function bufferCursor() {
+  const buffer = new Buffer(1);
+  buffer.writeUint32(0x12345678, 2);
+
+  assertEqual(buffer.getSize(), 8);
+  assertEqual(buffer.getCursor(), 0);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getUint8Array()],
+    [
+      0x00, 0x00, 0x12, 0x34,
+      0x56, 0x78, 0x00, 0x00
+    ]
+  );
+
+  buffer.writeInt32(0x1234abcd);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getUint8Array()],
+    [
+      0x12, 0x34, 0xab, 0xcd,
+      0x56, 0x78, 0x00, 0x00
+    ]
+  );
+
+  assertEqual(buffer.getCursor(), 4);
+  assertEqual(buffer.getSlicedBuffer().byteLength, 4);
+});
+
+test(function bufferSkip() {
+  const buffer = new Buffer(1);
+
+  const pos = buffer.skip(4);
+  assertEqual(buffer.getSize(), 4);
+
+  buffer.writeUint16(0xabcd);
+  assertEqual(buffer.getSize(), 8);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getSlicedUint8Array()],
+    [
+      0x00, 0x00, 0x00, 0x00,
+      0xab, 0xcd
+    ]
+  );
+
+  buffer.writeUint32(0x12345678, pos);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getSlicedUint8Array()],
+    [
+      0x12, 0x34, 0x56, 0x78,
+      0xab, 0xcd
+    ]
+  );
+});
