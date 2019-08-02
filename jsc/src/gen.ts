@@ -1,154 +1,150 @@
 import * as estree from "estree";
-import { GenContext, ByteCode } from "./context";
+import { ByteCode } from "./bytecode";
+import { Writer, Jump } from "./writer";
 
 export function gen(program: estree.Program): number[] {
   if (program.type !== "Program") throw new Error("Invalid input node to gen");
 
-  const context = new GenContext();
+  const writer = new Writer();
 
   for (const node of program.body) {
-    visit(context, node);
+    visit(writer, node);
   }
 
-  // TODO(qti3e) Ret
-  context.write(ByteCode.TODO);
+  writer.write(ByteCode.Ret);
 
-  return context.getBytecodes();
+  return writer.getData();
 }
 
-function visit(context: GenContext, node: estree.Node): void {
-  let jmp1: () => void;
-  let jmp2: () => void;
+function visit(writer: Writer, node: estree.Node): void {
+  let jmp1: Jump;
 
   switch (node.type) {
     case "ExpressionStatement":
-      visit(context, node.expression);
+      visit(writer, node.expression);
       break;
 
     case "ThisExpression":
-      context.write(ByteCode.LdThis);
+      writer.write(ByteCode.LdThis);
       break;
 
     case "BinaryExpression":
-      visit(context, node.left);
-      visit(context, node.right);
-      binaryOperator(context, node.operator);
+      visit(writer, node.left);
+      visit(writer, node.right);
+      binaryOperator(writer, node.operator);
       break;
 
     case "LogicalExpression":
-      visit(context, node.left);
-      jmp1 = context.jmp(
+      visit(writer, node.left);
+      jmp1 = writer.jmp(
         node.operator == "||" ? ByteCode.JmpTruePeek : ByteCode.JmpFalsePeek
       );
-      context.write(ByteCode.Pop);
-      visit(context, node.right);
-      jmp1();
+      writer.write(ByteCode.Pop);
+      visit(writer, node.right);
+      jmp1.here();
       break;
 
     case "Literal":
       switch (node.value) {
         case true:
-          context.write(ByteCode.LdTrue);
+          writer.write(ByteCode.LdTrue);
           break;
         case false:
-          context.write(ByteCode.LdFalse);
+          writer.write(ByteCode.LdFalse);
           break;
         case null:
-          context.write(ByteCode.LdNull);
+          writer.write(ByteCode.LdNull);
           break;
         case NaN:
-          context.write(ByteCode.LdNaN);
+          writer.write(ByteCode.LdNaN);
           break;
         case 1:
-          context.write(ByteCode.LdOne);
+          writer.write(ByteCode.LdOne);
           break;
         case 0:
-          context.write(ByteCode.LdZero);
+          writer.write(ByteCode.LdZero);
           break;
         default:
           // TODO(qti3e)
-          context.write(ByteCode.TODO);
+          writer.write(ByteCode.TODO);
       }
       break;
 
     default:
       // TODO(qti3e)
-      context.write(ByteCode.TODO);
+      writer.write(ByteCode.TODO);
       console.log("TODO: " + node.type);
       break;
   }
 }
 
-function binaryOperator(
-  context: GenContext,
-  operator: estree.BinaryOperator
-): void {
+function binaryOperator(writer: Writer, operator: estree.BinaryOperator): void {
   switch (operator) {
     case "==":
-      context.write(ByteCode.EQ);
+      writer.write(ByteCode.EQ);
       break;
     case "!=":
-      context.write(ByteCode.IEQ);
+      writer.write(ByteCode.IEQ);
       break;
     case "===":
-      context.write(ByteCode.EQS);
+      writer.write(ByteCode.EQS);
       break;
     case "!==":
-      context.write(ByteCode.IEQS);
+      writer.write(ByteCode.IEQS);
       break;
     case "<":
-      context.write(ByteCode.LT);
+      writer.write(ByteCode.LT);
       break;
     case "<=":
-      context.write(ByteCode.LTE);
+      writer.write(ByteCode.LTE);
       break;
     case ">":
-      context.write(ByteCode.GT);
+      writer.write(ByteCode.GT);
       break;
     case ">=":
-      context.write(ByteCode.GTE);
+      writer.write(ByteCode.GTE);
       break;
     case "<<":
-      context.write(ByteCode.BLS);
+      writer.write(ByteCode.BLS);
       break;
     case ">>":
-      context.write(ByteCode.BRS);
+      writer.write(ByteCode.BRS);
       break;
     case ">>>":
-      context.write(ByteCode.BURS);
+      writer.write(ByteCode.BURS);
       break;
     case "+":
-      context.write(ByteCode.Add);
+      writer.write(ByteCode.Add);
       break;
     case "-":
-      context.write(ByteCode.Sub);
+      writer.write(ByteCode.Sub);
       break;
     case "*":
-      context.write(ByteCode.Mul);
+      writer.write(ByteCode.Mul);
       break;
     case "/":
-      context.write(ByteCode.Div);
+      writer.write(ByteCode.Div);
       break;
     case "%":
-      context.write(ByteCode.Mod);
+      writer.write(ByteCode.Mod);
       break;
     case "**":
-      context.write(ByteCode.Pow);
+      writer.write(ByteCode.Pow);
       break;
     case "|":
-      context.write(ByteCode.BitOr);
+      writer.write(ByteCode.BitOr);
       break;
     case "^":
-      context.write(ByteCode.BitXor);
+      writer.write(ByteCode.BitXor);
       break;
     case "&":
-      context.write(ByteCode.BitAnd);
+      writer.write(ByteCode.BitAnd);
       break;
     case "instanceof":
-      context.write(ByteCode.InstanceOf);
+      writer.write(ByteCode.InstanceOf);
       break;
     case "in":
-      context.write(ByteCode.In);
+      writer.write(ByteCode.In);
       break;
   }
 }
