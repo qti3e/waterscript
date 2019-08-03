@@ -33,3 +33,5 @@ export function compileFunction(
 
   return writer.getData();
 }
+
+function findAndDeclareFunctionDeclarations(): void {}
