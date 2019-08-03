@@ -117,6 +117,15 @@ export class Buffer {
     }
   }
 
+  writeString(value: string, cursor = this.headOffset): void {
+    const u8 = textEncoder.encode(value);
+    this.resizeOnWrite(cursor, u8.byteLength);
+    this.view.set(u8, cursor);
+    if (arguments.length == 1) {
+      this.headOffset += u8.byteLength;
+    }
+  }
+
   getCursor() {
     return this.headOffset;
   }

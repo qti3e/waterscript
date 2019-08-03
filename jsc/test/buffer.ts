@@ -299,6 +299,26 @@ test(function bufferWriteFloat32() {
   );
 });
 
+test(function bufferWriteString() {
+  const buffer = new Buffer(1);
+
+  buffer.writeString("Hello");
+  buffer.writeString("سلام");
+  buffer.writeString("你好");
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getSlicedUint8Array()],
+    [
+      0x48, 0x65, 0x6c, 0x6c,
+      0x6f, 0xd8, 0xb3, 0xd9,
+      0x84, 0xd8, 0xa7, 0xd9,
+      0x85, 0xe4, 0xbd, 0xa0,
+      0xe5, 0xa5, 0xbd
+    ]
+  );
+});
+
 test(function bufferCursor() {
   const buffer = new Buffer(1);
   buffer.writeUint32(0x12345678, 2);
