@@ -212,7 +212,7 @@ if (!value) {
 | 0x92 | BlockOut   | Pop the last Block scope on the scope chain.  |
 | 0x93 | BlockIn    | Push a new Block scope to the scope chain.    |
 
-# Control flows with fixed size arguments.
+# Byte codes with fixed size arguments
 
 | Hex  | Name       | Arg size | Description                           |
 | ---- | ---------- | -------- | ------------------------------------- |

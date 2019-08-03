@@ -69,7 +69,7 @@ export enum ByteCode {
   FunctionIn = 0x91,
   BlockOut = 0x92,
   BlockIn = 0x93,
-  // Control flows with fixed size arguments.
+  // Byte codes with fixed size arguments
   LdFunction = 0xa0
 }
 
