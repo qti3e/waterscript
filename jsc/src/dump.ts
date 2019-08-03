@@ -6,6 +6,8 @@ export function dump(data: CompiledData): string {
   const codeU8 = new Uint8Array(data.codeSection);
   const cpU8 = new Uint8Array(data.constantPool);
 
+  result += "<-------SECTION".padEnd(80, "-") + "\n";
+
   for (let i = 0; i < codeU8.length; ++i) {
     const bytecode: ByteCode = codeU8[i] as ByteCode;
     const argSize = byteCodeArgSize[bytecode] || 0;
@@ -29,7 +31,7 @@ export function dump(data: CompiledData): string {
     result += line + "\n";
   }
 
-  result += "---CONSTANT POOL".padEnd(80, "-") + "\n";
+  result += "        +------CONSTANT POOL".padEnd(80, "-") + "\n";
 
   for (let i = 0; i < cpU8.length; i += 16) {
     let line = " ";
@@ -57,6 +59,8 @@ export function dump(data: CompiledData): string {
   if (cpU8.length === 0) {
     result += "EMPTY".padStart(40).padEnd(79) + "|\n";
   }
+
+  result += "          " + "END->".padStart(70, "-");
 
   return result;
 }
