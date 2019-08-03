@@ -1,11 +1,13 @@
 import { ByteCode, byteCodeArgSize } from "./bytecode";
+import { CompiledData } from "./writer";
 
-export function dump(buffer: ArrayBuffer): string {
+export function dump(data: CompiledData): string {
   let result = "";
-  const u8 = new Uint8Array(buffer);
+  const codeU8 = new Uint8Array(data.codeSection);
+  const cpU8 = new Uint8Array(data.constantPool);
 
-  for (let i = 0; i < u8.length; ++i) {
-    const bytecode: ByteCode = u8[i] as ByteCode;
+  for (let i = 0; i < codeU8.length; ++i) {
+    const bytecode: ByteCode = codeU8[i] as ByteCode;
     const argSize = byteCodeArgSize[bytecode] || 0;
 
     let line = " ";
@@ -13,10 +15,10 @@ export function dump(buffer: ArrayBuffer): string {
     line += " | ";
 
     for (let j = 0; j <= argSize; ++j) {
-      line += hex2str(u8[i + j]) + " ";
+      line += hex2str(codeU8[i + j]) + " ";
     }
 
-    line = line.padEnd(39);
+    line = line.padEnd(59);
     line += "| ";
     line += ByteCode[bytecode];
 
@@ -25,6 +27,26 @@ export function dump(buffer: ArrayBuffer): string {
 
     i += argSize;
     result += line + "\n";
+  }
+
+  result += "---CONSTANT POOL".padEnd(80, "-") + "\n";
+
+  for (let i = 0; i < cpU8.length; i += 16) {
+    let line = " ";
+    line += hex2str(i, "0000");
+    line += " | ";
+
+    for (let j = 0; j < 16; ++j) {
+      line += hex2str(codeU8[i + j]) + " ";
+    }
+
+    line = line.padEnd(79) + "|";
+
+    result += line + "\n";
+  }
+
+  if (cpU8.length === 0) {
+    result += "EMPTY".padStart(40).padEnd(79) + "|\n";
   }
 
   return result;

@@ -2,7 +2,7 @@ import { parse } from "acorn";
 import { gen } from "./gen";
 import { dump } from "./dump";
 
-export function compile(source: string): ArrayBuffer {
+export function compile(source: string) {
   const node = parse(source);
   return gen(node as any);
 }

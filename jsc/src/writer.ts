@@ -10,28 +10,42 @@ export type JumpByteCode =
   | ByteCode.JmpTruePop
   | ByteCode.JmpTrueThenPop;
 
-export type CompiledData = ArrayBuffer;
+export type CompiledData = {
+  codeSection: ArrayBuffer;
+  constantPool: ArrayBuffer;
+};
 
 export class Writer {
-  readonly data: Buffer = new Buffer();
-
-  write(code: ByteCode): void {
-    this.data.put(code);
-  }
+  readonly codeSection: Buffer = new Buffer(64);
+  readonly constantPool: Buffer = new Buffer(128);
 
   getData(): CompiledData {
-    return this.data.getSlicedBuffer();
+    return {
+      codeSection: this.codeSection.getSlicedBuffer(),
+      constantPool: this.constantPool.getSlicedBuffer()
+    };
   }
 
   jmp(type: JumpByteCode): Jump {
-    this.data.put(type);
-    const position = this.data.skip(2);
+    this.codeSection.put(type);
+    const position = this.codeSection.skip(2);
 
     return {
       here: () => {
-        this.data.writeInt16(this.data.getCursor() - 1, position);
+        this.codeSection.writeInt16(this.codeSection.getCursor() - 1, position);
       }
     };
+  }
+
+  write(code: ByteCode, constantPoolData?: string): void {
+    this.codeSection.put(code);
+
+    if (constantPoolData) {
+      const index = this.constantPool.getCursor();
+      this.constantPool.writeInt16(constantPoolData.length);
+      this.constantPool.writeString(constantPoolData);
+      this.codeSection.writeUint32(index);
+    }
   }
 }
 
