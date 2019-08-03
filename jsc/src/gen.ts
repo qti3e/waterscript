@@ -1,15 +1,13 @@
 import * as estree from "estree";
 import { visit } from "./visitor";
 import { Writer, CompiledData } from "./writer";
-import { Context } from "./context";
+import { Compiler } from "./compiler";
 
 export function compileMain(
-  context: Context,
+  compiler: Compiler,
   program: estree.Program
 ): CompiledData {
-  const writer = new Writer(context);
-
-  // TODO(qti3e);
+  const writer = new Writer(compiler);
 
   for (const node of program.body) {
     visit(writer, node);
@@ -19,13 +17,12 @@ export function compileMain(
 }
 
 export function compileFunction(
-  context: Context,
+  compiler: Compiler,
   functionNode: estree.Function
 ): CompiledData {
-  const writer = new Writer(context);
+  const writer = new Writer(compiler);
   const body = functionNode.body;
 
-  // TODO(qti3e);
   switch (body.type) {
     case "BlockStatement":
       for (const node of body.body) {

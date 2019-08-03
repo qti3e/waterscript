@@ -1,19 +1,19 @@
-import { Context } from "./context";
+import { Compiler } from "./compiler";
 import { dump } from "./dump";
 
 function main() {
   const source = `
-  a + 1 * 0;
-  function x() {
-    b * 0;
-  }
+a + 1 * 0;
+function x() {
+  b * 0;
+}
 
-  function y() {
-    "Hello!";
-  }
-  `;
+function y(p) {
+  "Hello!";
+}
+`;
 
-  const context = new Context();
+  const context = new Compiler();
   context.compile(source);
   const ret = context.getCompiledProgram();
 

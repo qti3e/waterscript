@@ -13,7 +13,7 @@ interface CompiledProgram {
   functions: CompiledData[];
 }
 
-export class Context {
+export class Compiler {
   private readonly functions: CompiledData[] = [];
   private readonly functionVisitQueue: VisitQueueEntity[] = [];
   private main: CompiledData | undefined;
