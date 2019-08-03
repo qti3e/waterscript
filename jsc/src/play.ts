@@ -1,17 +1,26 @@
-import { parse } from "acorn";
-import { gen } from "./gen";
+import { Context } from "./context";
 import { dump } from "./dump";
 
 function main() {
-  const source = "a * 1";
+  const source = `
+  a + 1 * 0;
+  function x() {
+    b * 0;
+  }
 
-  const node = parse(source);
-  console.log(JSON.stringify(node, null, 4));
+  function y() {
+    "Hello!";
+  }
+  `;
 
-  const ret = gen(node as any);
+  const context = new Context();
+  context.compile(source);
+  const ret = context.getCompiledProgram();
 
-  console.log("\n\nSource:```\n" + source + "\n```");
-  console.log(dump(ret));
+  console.log(dump(ret.main));
+  for (let i = 0; i < ret.functions.length; ++i) {
+    console.log(dump(ret.functions[i], i.toString(16)));
+  }
 }
 
 main();

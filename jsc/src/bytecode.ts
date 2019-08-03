@@ -68,7 +68,9 @@ export enum ByteCode {
   Ret = 0x90,
   FunctionIn = 0x91,
   BlockOut = 0x92,
-  BlockIn = 0x93
+  BlockIn = 0x93,
+  // Control flows with fixed size arguments.
+  LdFunction = 0xa0
 }
 
 export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
@@ -87,5 +89,6 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.Let]: 4,
   [ByteCode.Const]: 4,
   [ByteCode.InitConst]: 4,
-  [ByteCode.LdStr]: 4
+  [ByteCode.LdStr]: 4,
+  [ByteCode.LdFunction]: 2
 };

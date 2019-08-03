@@ -1,12 +1,13 @@
 import { ByteCode, byteCodeArgSize } from "./bytecode";
 import { CompiledData } from "./writer";
 
-export function dump(data: CompiledData): string {
+export function dump(data: CompiledData, sectionName = "MAIN"): string {
   let result = "";
   const codeU8 = new Uint8Array(data.codeSection);
   const cpU8 = new Uint8Array(data.constantPool);
+  const sectionTitle = "SECTION #" + sectionName;
 
-  result += "<-------SECTION".padEnd(80, "-") + "\n";
+  result += ("<-------" + sectionTitle).padEnd(80, "-") + "\n";
 
   for (let i = 0; i < codeU8.length; ++i) {
     const bytecode: ByteCode = codeU8[i] as ByteCode;
@@ -60,7 +61,7 @@ export function dump(data: CompiledData): string {
     result += "EMPTY".padStart(40).padEnd(79) + "|\n";
   }
 
-  result += "          " + "END->".padStart(70, "-");
+  result += "          " + (sectionTitle + "->").padStart(70, "-");
 
   return result;
 }

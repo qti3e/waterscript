@@ -1,5 +1,6 @@
 import { ByteCode } from "./bytecode";
 import { Buffer } from "./buffer";
+import { Context } from "./context";
 
 export type JumpByteCode =
   | ByteCode.Jmp
@@ -18,6 +19,8 @@ export type CompiledData = {
 export class Writer {
   readonly codeSection: Buffer = new Buffer(64);
   readonly constantPool: Buffer = new Buffer(128);
+
+  constructor(readonly context: Context) {}
 
   getData(): CompiledData {
     return {

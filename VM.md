@@ -71,6 +71,8 @@ constant pool.
 
 ## Data Stack with Constant Pool
 
+A reference to the constant pool is a Uint32.
+
 | Hex  | Byte Code | Entry Type | Description                                |
 | ---- | --------- | ---------- | ------------------------------------------ |
 | 0x40 | NamedProp | String     | $($[CT])                                   |
@@ -209,6 +211,12 @@ if (!value) {
 | 0x91 | FunctionIn | Push a new Function scope to the scope chain. |
 | 0x92 | BlockOut   | Pop the last Block scope on the scope chain.  |
 | 0x93 | BlockIn    | Push a new Block scope to the scope chain.    |
+
+# Control flows with fixed size arguments.
+
+| Hex  | Name       | Arg size | Description                           |
+| ---- | ---------- | -------- | ------------------------------------- |
+| 0xa0 | LdFunction | 16 bit   | Load function from the functions set. |
 
 ## TODO
 
