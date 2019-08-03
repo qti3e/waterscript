@@ -81,6 +81,7 @@ constant pool.
 | 0x45 | Let       | String     | Define `CT` in the current Block-scope.    |
 | 0x46 | Const     | String     | Define `CT` in the current Block-scope.    |
 | 0x47 | InitConst | String     | `CT` = \$                                  |
+| 0x48 | LdStr     | String     | Push the netstr at `CT` to the data stack. |
 
 > Note `Let` and `Const` sets the `lexical-declreation` flag to true.
 

@@ -55,6 +55,7 @@ export enum ByteCode {
   Let = 0x45,
   Const = 0x46,
   InitConst = 0x47,
+  LdStr = 0x48,
   // Control Flow
   Jmp = 0x70,
   JmpTruePop = 0x71,
@@ -85,5 +86,6 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.Var]: 4,
   [ByteCode.Let]: 4,
   [ByteCode.Const]: 4,
-  [ByteCode.InitConst]: 4
+  [ByteCode.InitConst]: 4,
+  [ByteCode.LdStr]: 4
 };

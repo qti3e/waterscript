@@ -33,11 +33,20 @@ export function dump(data: CompiledData): string {
 
   for (let i = 0; i < cpU8.length; i += 16) {
     let line = " ";
-    line += hex2str(i, "0000");
+    line += i.toString(16).padStart(8, "0");
     line += " | ";
 
-    for (let j = 0; j < 16; ++j) {
-      line += hex2str(codeU8[i + j]) + " ";
+    for (let j = 0; j < 16 && i + j < cpU8.length; ++j) {
+      if (j === 8) line += "  ";
+      line += cpU8[i + j].toString(16).padStart(2, "0") + " ";
+    }
+
+    line = line.padEnd(62);
+    line += "|";
+
+    for (let j = 0; j < 16 && i + j < cpU8.length; ++j) {
+      const c = cpU8[i + j];
+      line += c >= 0x20 && c <= 0x7e ? String.fromCharCode(c) : ".";
     }
 
     line = line.padEnd(79) + "|";
@@ -53,5 +62,5 @@ export function dump(data: CompiledData): string {
 }
 
 function hex2str(num: number, pad = "00"): string {
-  return "0x" + (pad + num.toString(16)).slice(-2);
+  return "0x" + (pad + num.toString(16)).slice(-pad.length);
 }

@@ -65,7 +65,10 @@ function visit(writer: Writer, node: estree.Node): void {
           writer.write(ByteCode.LdZero);
           break;
         default:
-          // TODO(qti3e)
+          if (typeof node.value === "string") {
+            writer.write(ByteCode.LdStr, node.value);
+            break;
+          }
           writer.write(ByteCode.TODO);
       }
       break;

@@ -3,7 +3,7 @@ import { gen } from "./gen";
 import { dump } from "./dump";
 
 function main() {
-  const source = "true || 1";
+  const source = "true || 'hello world is there any thing'";
 
   const node = parse(source);
   console.log(JSON.stringify(node, null, 4));
