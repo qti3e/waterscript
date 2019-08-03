@@ -64,8 +64,8 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
 
     case "FunctionDeclaration":
-      writer.write(ByteCode.LdFunction);
-      writer.codeSection.writeUint16(writer.compiler.requestVisit(node));
+      // Function Declaration is already seen due to how hoisting
+      // is implemented.
       break;
 
     default:

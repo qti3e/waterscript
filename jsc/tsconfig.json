@@ -12,6 +12,6 @@
     "alwaysStrict": true,
     "strict": true
   },
-  "include": ["src/**/*", "test/**/*"],
+  "include": ["src/**/*", "test/**/*", "*.d.ts"],
   "exclude": ["node_modules", "**/*.spec.ts"]
 }

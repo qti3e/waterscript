@@ -3,14 +3,15 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-a + 1 * 0;
-function x() {
-  b * 0;
+a * 0;
+
+function y() {
 }
 
-function y(p) {
-  "Hello!";
+function x() {
 }
+
+var test = 19;
 `;
 
   const context = new Compiler();
