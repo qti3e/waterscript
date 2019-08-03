@@ -73,6 +73,10 @@ function visit(writer: Writer, node: estree.Node): void {
       }
       break;
 
+    case "Identifier":
+      writer.write(ByteCode.Named, node.name);
+      break;
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
