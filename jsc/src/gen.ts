@@ -14,9 +14,8 @@ export function compileMain(
 
   for (const node of ret.vars) {
     for (const d of node.declarations) {
-      // TODO(qti3e) Support other patterns.
-      if (d.id.type == "Identifier") {
-        writer.write(ByteCode.Var, d.id.name);
+      for (const name of extractNames(d.id)) {
+        writer.write(ByteCode.Var, name);
       }
     }
   }
@@ -71,4 +70,37 @@ function findFunctionDeclarationsAndVars(
   });
 
   return { vars, functions };
+}
+
+function extractNames(pattern: estree.Pattern): string[] {
+  if (pattern.type === "Identifier") return [pattern.name];
+
+  const ret: string[] = [];
+
+  walk.recursive(pattern, null, {
+    Identifier(node, state, c) {
+      ret.push(node.name);
+    },
+    ArrayPattern(node, state, c) {
+      for (const element of node.elements) {
+        c(element, state);
+      }
+    },
+    AssignmentPattern(node, state, c) {
+      c(node.left, state);
+    },
+    MemberExpression(node, state, c) {
+      throw new Error("Invalid MemberExpression!");
+    },
+    ObjectPattern(node, state, c) {
+      for (const property of node.properties) {
+        c(property, state);
+      }
+    },
+    RestElement(node, state, c) {
+      c(node.argument, state);
+    }
+  });
+
+  return ret;
 }

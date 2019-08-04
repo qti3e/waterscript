@@ -3,15 +3,21 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-a * 0;
+  var {
+    a,
+    "T": b,
+    _c: c,
+    kids: {
+      _d: d,
+      ...e
+    },
+    list: [f, g, ...h],
+    ...i
+  } = test;
 
-function y() {
-}
-
-function x() {
-}
-
-var test = 19;
+  {
+    var j = 9;
+  }
 `;
 
   const context = new Compiler();
