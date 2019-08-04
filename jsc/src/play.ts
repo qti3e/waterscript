@@ -3,25 +3,14 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  var {
-    a,
-    "T": b,
-    _c: c,
-    kids: {
-      _d: d,
-      ...e
-    },
-    list: [f, g, ...h],
-    ...i
-  } = test;
-
-  {
-    var j = 9;
-  }
+void x;
+a - -0;
 `;
 
   const context = new Compiler();
+  console.time("Compile");
   context.compile(source);
+  console.timeEnd("Compile");
   const ret = context.getCompiledProgram();
 
   console.log(dump(ret.main));

@@ -30,6 +30,11 @@ export function visit(writer: Writer, node: estree.Node): void {
       jmp1.here();
       break;
 
+    case "UnaryExpression":
+      visit(writer, node.argument);
+      unaryOperator(writer, node.operator);
+      break;
+
     case "Literal":
       switch (node.value) {
         case true:
@@ -143,6 +148,33 @@ function binaryOperator(writer: Writer, operator: estree.BinaryOperator): void {
       break;
     case "in":
       writer.write(ByteCode.In);
+      break;
+  }
+}
+
+function unaryOperator(writer: Writer, operator: estree.UnaryOperator): void {
+  switch (operator) {
+    case "-":
+      writer.write(ByteCode.Neg);
+      break;
+    case "!":
+      writer.write(ByteCode.Not);
+      break;
+    case "+":
+      writer.write(ByteCode.Pos);
+      break;
+    case "~":
+      writer.write(ByteCode.BitNot);
+      break;
+    case "delete":
+      // TODO(qti3e);
+      writer.write(ByteCode.TODO);
+      break;
+    case "typeof":
+      writer.write(ByteCode.Type);
+      break;
+    case "void":
+      writer.write(ByteCode.Void);
       break;
   }
 }
