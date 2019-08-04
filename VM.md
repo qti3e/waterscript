@@ -19,6 +19,8 @@ asgn(pointer, value);
 Also we're using `CT` for the data that comes with the bytecode from the
 constant pool.
 
+And there is `#` for `peek()`
+
 ## Data Stack Main Functions.
 
 | Hex  | Byte Code                 | Description    |
@@ -68,22 +70,22 @@ constant pool.
 | 0x2b | Prop                      | $($[$])        |
 | 0x2c | InstanceOf                | $ instanceof $ |
 | 0x2d | In                        | $ in $         |
+| 0x2e | Next                      | \$(#.next())   |
 
 ## Data Stack with Constant Pool
 
 A reference to the constant pool is a Uint32.
 
-| Hex  | Byte Code | Entry Type | Description                                |
-| ---- | --------- | ---------- | ------------------------------------------ |
-| 0x40 | NamedProp | String     | $($[CT])                                   |
-| 0x41 | Load      | any wval   | \$(CT)                                     |
-| 0x42 | Named     | String     | Push the variable `CT` to the stack.       |
-| 0x43 | Store     | String     | `CT` = `peek()`                            |
-| 0x44 | Var       | String     | Define `CT` in the current Function-scope. |
-| 0x45 | Let       | String     | Define `CT` in the current Block-scope.    |
-| 0x46 | Const     | String     | Define `CT` in the current Block-scope.    |
-| 0x47 | InitConst | String     | `CT` = \$                                  |
-| 0x48 | LdStr     | String     | Push the netstr at `CT` to the data stack. |
+| Hex  | Byte Code  | Entry Type | Description                                |
+| ---- | ---------- | ---------- | ------------------------------------------ |
+| 0x40 | LdStr      | String     | Push the netstr at `CT` to the data stack. |
+| 0x41 | NamedProp  | String     | $($[`CT`])                                 |
+| 0x42 | Named      | String     | Push the variable `CT` to the stack.       |
+| 0x43 | Store      | String     | `CT` = #                                   |
+| 0x44 | Var        | String     | def `CT` = undefined                       |
+| 0x45 | Let        | String     | Var(`CT`) ; Store(`CT`)                    |
+| 0x46 | SetIsConst | String     | Set `isConstant` flag on `CT` on.          |
+| 0x47 | Const      | String     | Let(`CT`) ; SetIsConst(`CT`)               |
 
 > Note `Let` and `Const` sets the `lexical-declreation` flag to true.
 
@@ -216,7 +218,7 @@ if (!value) {
 
 | Hex  | Name       | Arg size | Description                           |
 | ---- | ---------- | -------- | ------------------------------------- |
-| 0xa0 | LdFunction | 16 bit   | Load function from the functions set. |
+| 0xa0 | LdFunction | 2 bytes  | Load function from the functions set. |
 
 ## TODO
 
