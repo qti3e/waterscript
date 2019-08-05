@@ -3,8 +3,10 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-void x;
-a - -0;
+function abc() {
+}
+
+abc * 0;
 `;
 
   const context = new Compiler();

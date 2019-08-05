@@ -6,21 +6,24 @@ export function visit(writer: Writer, node: estree.Node): void {
   let jmp1: Jump;
 
   switch (node.type) {
-    case "ExpressionStatement":
+    case "ExpressionStatement": {
       visit(writer, node.expression);
       break;
+    }
 
-    case "ThisExpression":
+    case "ThisExpression": {
       writer.write(ByteCode.LdThis);
       break;
+    }
 
-    case "BinaryExpression":
+    case "BinaryExpression": {
       visit(writer, node.left);
       visit(writer, node.right);
       binaryOperator(writer, node.operator);
       break;
+    }
 
-    case "LogicalExpression":
+    case "LogicalExpression": {
       visit(writer, node.left);
       jmp1 = writer.jmp(
         node.operator == "||" ? ByteCode.JmpTruePeek : ByteCode.JmpFalsePeek
@@ -29,13 +32,15 @@ export function visit(writer: Writer, node: estree.Node): void {
       visit(writer, node.right);
       jmp1.here();
       break;
+    }
 
-    case "UnaryExpression":
+    case "UnaryExpression": {
       visit(writer, node.argument);
       unaryOperator(writer, node.operator);
       break;
+    }
 
-    case "Literal":
+    case "Literal": {
       switch (node.value) {
         case true:
           writer.write(ByteCode.LdTrue);
@@ -63,15 +68,19 @@ export function visit(writer: Writer, node: estree.Node): void {
           writer.write(ByteCode.TODO);
       }
       break;
+    }
 
-    case "Identifier":
+    case "Identifier": {
       writer.write(ByteCode.Named, node.name);
       break;
+    }
 
-    case "FunctionDeclaration":
-      // Function Declaration is already seen due to how hoisting
-      // is implemented.
+    case "FunctionDeclaration": {
+      const index = writer.compiler.requestVisit(node);
+      writer.scope.addFunction(node.id!.name, index);
+      // No instruction is needed.
       break;
+    }
 
     default:
       // TODO(qti3e)

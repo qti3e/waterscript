@@ -17,10 +17,8 @@ export class Compiler {
   private readonly functions: CompiledData[] = [];
   private readonly functionVisitQueue: VisitQueueEntity[] = [];
   private main: CompiledData | undefined;
+  inVarDef = false;
 
-  /**
-   * The returned index can be used in `LdFunction`.
-   */
   requestVisit(node: estree.Function): number {
     const index = this.functionVisitQueue.length;
     const entity = { index, node };

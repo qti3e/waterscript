@@ -1,20 +1,24 @@
 import { ByteCode, byteCodeArgSize } from "./bytecode";
 import { CompiledData } from "./writer";
+import { TextDecoder } from "./text_encoding";
+
+const textDecoder = new TextDecoder();
 
 export function dump(data: CompiledData, sectionName = "MAIN"): string {
   let result = "";
   const codeU8 = new Uint8Array(data.codeSection);
   const cpU8 = new Uint8Array(data.constantPool);
+  const scopeU8 = new Uint8Array(data.scope);
   const sectionTitle = "SECTION #" + sectionName;
 
-  result += ("<-------" + sectionTitle).padEnd(80, "-") + "\n";
+  result += ("+>" + sectionTitle).padEnd(80, "-") + "\n";
 
   for (let i = 0; i < codeU8.length; ++i) {
     const bytecode: ByteCode = codeU8[i] as ByteCode;
     const argSize = byteCodeArgSize[bytecode] || 0;
 
     let line = " ";
-    line += hex2str(i, "0000");
+    line += hex2str(i, "00000000");
     line += " | ";
 
     for (let j = 0; j <= argSize; ++j) {
@@ -32,7 +36,32 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     result += line + "\n";
   }
 
-  result += "        +------CONSTANT POOL".padEnd(80, "-") + "\n";
+  result += "          +------SCOPE".padEnd(80, "-") + "\n";
+
+  const scopeItemsLength = readUint16(scopeU8, 0);
+  let scopeCursor = 2;
+  if (scopeItemsLength === 0) {
+    result += "|".padStart(11) + "EMPTY".padStart(34).padEnd(68) + "|\n";
+  }
+
+  for (let i = 0; i < scopeItemsLength; ++i) {
+    let line = "";
+    const isFunction = scopeU8[scopeCursor];
+    const strLen = readUint16(scopeU8, scopeCursor + 1);
+    const start = scopeCursor + 3;
+    const name = textDecoder.decode(scopeU8.slice(start, start + strLen));
+    scopeCursor += 2 + strLen;
+
+    line += "DEF " + name;
+    if (isFunction) {
+      const fnId = readUint16(scopeU8, scopeCursor);
+      line += " FUNCTION(" + hex2str(fnId) + ")";
+      scopeCursor += 2;
+    }
+    result += ("| ".padStart(12) + line).padEnd(79) + "|\n";
+  }
+
+  result += "          +----CONSTANT POOL".padEnd(80, "-") + "\n";
 
   for (let i = 0; i < cpU8.length; i += 16) {
     let line = " ";
@@ -58,14 +87,16 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
   }
 
   if (cpU8.length === 0) {
-    result += "EMPTY".padStart(40).padEnd(79) + "|\n";
+    result += "|".padStart(11) + "EMPTY".padStart(34).padEnd(68) + "|\n";
   }
 
-  result += "          " + (sectionTitle + "->").padStart(70, "-");
-
-  return result;
+  return result.slice(0, result.length - 1);
 }
 
 function hex2str(num: number, pad = "00"): string {
-  return "0x" + (pad + num.toString(16)).slice(-pad.length);
+  return (pad + num.toString(16)).slice(-pad.length);
+}
+
+function readUint16(u8: Uint8Array, index: number): number {
+  return (u8[index] << 8) + u8[index + 1];
 }

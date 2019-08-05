@@ -15,7 +15,9 @@ export class Scope {
 
   addFunction(name: string, id: number): void {
     this.buffer.writeUint16(++this.num, 0);
-    this.buffer.put(0);
+    this.buffer.put(1);
+    // TODO(qti3e) This is wrong... name.length is not the
+    // same as number of bytes.
     this.buffer.writeUint16(name.length);
     this.buffer.writeString(name);
     this.buffer.writeUint16(id);
@@ -23,7 +25,9 @@ export class Scope {
 
   addVariable(name: string): void {
     this.buffer.writeUint16(++this.num, 0);
-    this.buffer.put(1);
+    this.buffer.put(0);
+    // TODO(qti3e) This is wrong... name.length is not the
+    // same as number of bytes.
     this.buffer.writeUint16(name.length);
     this.buffer.writeString(name);
   }
