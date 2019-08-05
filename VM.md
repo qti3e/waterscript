@@ -209,10 +209,11 @@ if (!value) {
 
 | Hex  | Name       | Description                                   |
 | ---- | ---------- | --------------------------------------------- |
-| 0x90 | Ret        | Return from a function.                       |
-| 0x91 | FunctionIn | Push a new Function scope to the scope chain. |
-| 0x92 | BlockOut   | Pop the last Block scope on the scope chain.  |
-| 0x93 | BlockIn    | Push a new Block scope to the scope chain.    |
+| 0x90 | LdScope    | Load the scope for the current section.       |
+| 0x91 | Ret        | Return from a function.                       |
+| 0x92 | FunctionIn | Push a new Function scope to the scope chain. |
+| 0x93 | BlockOut   | Pop the last Block scope on the scope chain.  |
+| 0x94 | BlockIn    | Push a new Block scope to the scope chain.    |
 
 # Byte codes with fixed size arguments
 

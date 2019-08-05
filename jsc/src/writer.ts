@@ -24,7 +24,7 @@ export class Writer {
   readonly scope: Scope = new Scope();
 
   constructor(readonly compiler: Compiler) {
-    // TODO(qti3e) The first instruction must be LdScope.
+    this.codeSection.put(ByteCode.LdScope);
   }
 
   getData(): CompiledData {

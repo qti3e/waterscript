@@ -65,10 +65,11 @@ export enum ByteCode {
   JmpTrueThenPop = 0x75,
   JmpFalseThenPop = 0x76,
   // Hoisting and Scoping
-  Ret = 0x90,
-  FunctionIn = 0x91,
-  BlockOut = 0x92,
-  BlockIn = 0x93,
+  LdScope = 0x90,
+  Ret = 0x91,
+  FunctionIn = 0x92,
+  BlockOut = 0x93,
+  BlockIn = 0x94,
   // Byte codes with fixed size arguments
   LdFunction = 0xa0
 }

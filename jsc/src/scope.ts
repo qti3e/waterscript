@@ -16,7 +16,7 @@ export class Scope {
   addFunction(name: string, id: number): void {
     this.buffer.writeUint16(++this.num, 0);
     this.buffer.put(0);
-    this.buffer.writeUint32(name.length);
+    this.buffer.writeUint16(name.length);
     this.buffer.writeString(name);
     this.buffer.writeUint16(id);
   }
@@ -24,7 +24,7 @@ export class Scope {
   addVariable(name: string): void {
     this.buffer.writeUint16(++this.num, 0);
     this.buffer.put(1);
-    this.buffer.writeUint32(name.length);
+    this.buffer.writeUint16(name.length);
     this.buffer.writeString(name);
   }
 }
