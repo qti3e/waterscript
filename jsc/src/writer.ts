@@ -1,6 +1,7 @@
 import { ByteCode } from "./bytecode";
 import { Buffer } from "./buffer";
 import { Compiler } from "./compiler";
+import { Scope } from "./scope";
 
 export type JumpByteCode =
   | ByteCode.Jmp
@@ -14,18 +15,23 @@ export type JumpByteCode =
 export type CompiledData = {
   codeSection: ArrayBuffer;
   constantPool: ArrayBuffer;
+  scope: ArrayBuffer;
 };
 
 export class Writer {
   readonly codeSection: Buffer = new Buffer(64);
   readonly constantPool: Buffer = new Buffer(128);
+  readonly scope: Scope = new Scope();
 
-  constructor(readonly compiler: Compiler) {}
+  constructor(readonly compiler: Compiler) {
+    // TODO(qti3e) The first instruction must be LdScope.
+  }
 
   getData(): CompiledData {
     return {
       codeSection: this.codeSection.getSlicedBuffer(),
-      constantPool: this.constantPool.getSlicedBuffer()
+      constantPool: this.constantPool.getSlicedBuffer(),
+      scope: this.scope.getArrayBuffer()
     };
   }
 
