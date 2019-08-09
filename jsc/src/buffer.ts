@@ -67,7 +67,7 @@ export class Buffer {
     this.resizeOnWrite(cursor, 1);
     this.view[cursor] = data;
 
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset++;
     }
   }
@@ -77,7 +77,7 @@ export class Buffer {
     this.view[cursor + 1] = value & 0xff;
     this.view[cursor] = (value >>> 8) & 0xff;
 
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset += 2;
     }
   }
@@ -89,20 +89,20 @@ export class Buffer {
     this.view[cursor + 1] = (value >>> 16) & 0xff;
     this.view[cursor + 0] = (value >>> 24) & 0xff;
 
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset += 4;
     }
   }
 
   writeInt16(value: number, cursor = this.headOffset): void {
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
       return this.writeUint16(value < 0 ? value | 0x10000 : value, cursor);
     }
     this.writeUint16(value < 0 ? value | 0x10000 : value);
   }
 
   writeInt32(value: number, cursor = this.headOffset): void {
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
       return this.writeUint16(value < 0 ? value | 0x10000 : value, cursor);
     }
     this.writeUint32(value < 0 ? value | 0x100000000 : value);
@@ -112,7 +112,7 @@ export class Buffer {
     this.resizeOnWrite(cursor, 4);
     writeFloat(this.view, cursor, value, false, 23, 4);
 
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset += 4;
     }
   }
@@ -120,7 +120,7 @@ export class Buffer {
   writeFloat64(value: number, cursor = this.headOffset): void {
     this.resizeOnWrite(cursor, 8);
     writeFloat(this.view, cursor, value, false, 52, 8);
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset += 8;
     }
   }
@@ -129,8 +129,36 @@ export class Buffer {
     const u8 = textEncoder.encode(value);
     this.resizeOnWrite(cursor, u8.byteLength);
     this.view.set(u8, cursor);
-    if (arguments.length == 1) {
+    if (arguments.length === 1) {
       this.headOffset += u8.byteLength;
+    }
+  }
+
+  writeNetString16(value: string, cursor = this.headOffset): void {
+    const u8 = textEncoder.encode(value);
+    const length = u8.length;
+    const size = 2 + length;
+    this.resizeOnWrite(cursor, size);
+    this.view[cursor + 1] = length & 0xff;
+    this.view[cursor] = (length >>> 8) & 0xff;
+    this.view.set(u8, cursor + 2);
+    if (arguments.length === 1) {
+      this.headOffset += size;
+    }
+  }
+
+  writeNetString32(value: string, cursor = this.headOffset): void {
+    const u8 = textEncoder.encode(value);
+    const length = u8.length;
+    const size = 4 + length;
+    this.resizeOnWrite(cursor, size);
+    this.view[cursor + 3] = length & 0xff;
+    this.view[cursor + 2] = (length >>> 8) & 0xff;
+    this.view[cursor + 1] = (length >>> 16) & 0xff;
+    this.view[cursor + 0] = (length >>> 24) & 0xff;
+    this.view.set(u8, cursor + 4);
+    if (arguments.length === 1) {
+      this.headOffset += size;
     }
   }
 
@@ -183,7 +211,7 @@ function writeFloat(
   let eLen = bytes * 8 - mLen - 1;
   const eMax = (1 << eLen) - 1;
   const eBias = eMax >> 1;
-  const rt = mLen == 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+  const rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
   const d = littleEndian ? 1 : -1;
   const s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0;
   let i = littleEndian ? 0 : bytes - 1;

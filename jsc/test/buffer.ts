@@ -379,3 +379,42 @@ test(function bufferSkip() {
     ]
   );
 });
+
+test(function bufferWriteNetString16() {
+  const buffer = new Buffer(1);
+
+  buffer.writeNetString16("سلام");
+  assertEqual(buffer.getSize(), 16);
+  // To test that cursor has moved.
+  buffer.put(0xff);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getSlicedUint8Array()],
+    [
+      0x00, 0x08, 0xd8, 0xb3,
+      0xd9, 0x84, 0xd8, 0xa7,
+      0xd9, 0x85, 0xff
+    ]
+  );
+});
+
+test(function bufferWriteNetString32() {
+  const buffer = new Buffer(1);
+
+  buffer.writeNetString32("سلام");
+  assertEqual(buffer.getSize(), 16);
+  // To test that cursor has moved.
+  buffer.put(0xff);
+
+  // prettier-ignore
+  assertEqual(
+    [...buffer.getSlicedUint8Array()],
+    [
+      0x00, 0x00, 0x00, 0x08,
+      0xd8, 0xb3, 0xd9, 0x84,
+      0xd8, 0xa7, 0xd9, 0x85,
+      0xff
+    ]
+  );
+});
