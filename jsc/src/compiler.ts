@@ -1,3 +1,11 @@
+/**
+ *    ____ _   _ _____
+ *   /___ \ |_(_)___ /  ___
+ *  //  / / __| | |_ \ / _ \
+ * / \_/ /| |_| |___) |  __/
+ * \___,_\ \__|_|____/ \___|
+ */
+
 import * as estree from "estree";
 import { parse } from "acorn";
 import { CompiledData } from "./writer";
