@@ -51,8 +51,7 @@ export class Writer {
 
     if (constantPoolData) {
       const index = this.constantPool.getCursor();
-      this.constantPool.writeInt16(constantPoolData.length);
-      this.constantPool.writeString(constantPoolData);
+      this.constantPool.writeNetString16(constantPoolData);
       this.codeSection.writeUint32(index);
     }
   }
