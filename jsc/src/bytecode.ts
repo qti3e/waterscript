@@ -57,6 +57,7 @@ export enum ByteCode {
   Next = 0x2e,
   ArPush = 0x2f,
   LdTwo = 0x30,
+  Del = 0x31,
   // Data Stack with Constant Pool
   LdStr = 0x40,
   NamedProp = 0x41,

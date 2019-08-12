@@ -8,7 +8,7 @@
 
 import * as estree from "estree";
 import { ByteCode } from "./bytecode";
-import { Writer, Jump, CompiledData } from "./writer";
+import { Writer } from "./writer";
 
 export function visit(writer: Writer, node: estree.Node): void {
   switch (node.type) {
@@ -125,8 +125,7 @@ export function visit(writer: Writer, node: estree.Node): void {
           writer.write(ByteCode.BitNot);
           break;
         case "delete":
-          // TODO(qti3e);
-          writer.write(ByteCode.TODO);
+          writer.write(ByteCode.Del);
           break;
         case "typeof":
           writer.write(ByteCode.Type);

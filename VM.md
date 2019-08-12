@@ -73,6 +73,7 @@ And there is `#` for `peek()`
 | 0x2e | Next                      | \$(#.next())   |
 | 0x2f | ArPush                    | #2.push(\$1)   |
 | 0x30 | LdTwo                     | \$(2)          |
+| 0x31 | Del                       | delete \$      |
 
 ## Data Stack with Constant Pool
 
