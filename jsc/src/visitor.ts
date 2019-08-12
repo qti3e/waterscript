@@ -27,7 +27,75 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "BinaryExpression": {
       visit(writer, node.left);
       visit(writer, node.right);
-      binaryOperator(writer, node.operator);
+
+      switch (node.operator) {
+        case "==":
+          writer.write(ByteCode.EQ);
+          break;
+        case "!=":
+          writer.write(ByteCode.IEQ);
+          break;
+        case "===":
+          writer.write(ByteCode.EQS);
+          break;
+        case "!==":
+          writer.write(ByteCode.IEQS);
+          break;
+        case "<":
+          writer.write(ByteCode.LT);
+          break;
+        case "<=":
+          writer.write(ByteCode.LTE);
+          break;
+        case ">":
+          writer.write(ByteCode.GT);
+          break;
+        case ">=":
+          writer.write(ByteCode.GTE);
+          break;
+        case "<<":
+          writer.write(ByteCode.BLS);
+          break;
+        case ">>":
+          writer.write(ByteCode.BRS);
+          break;
+        case ">>>":
+          writer.write(ByteCode.BURS);
+          break;
+        case "+":
+          writer.write(ByteCode.Add);
+          break;
+        case "-":
+          writer.write(ByteCode.Sub);
+          break;
+        case "*":
+          writer.write(ByteCode.Mul);
+          break;
+        case "/":
+          writer.write(ByteCode.Div);
+          break;
+        case "%":
+          writer.write(ByteCode.Mod);
+          break;
+        case "**":
+          writer.write(ByteCode.Pow);
+          break;
+        case "|":
+          writer.write(ByteCode.BitOr);
+          break;
+        case "^":
+          writer.write(ByteCode.BitXor);
+          break;
+        case "&":
+          writer.write(ByteCode.BitAnd);
+          break;
+        case "instanceof":
+          writer.write(ByteCode.InstanceOf);
+          break;
+        case "in":
+          writer.write(ByteCode.In);
+          break;
+      }
       break;
     }
 
@@ -44,7 +112,31 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "UnaryExpression": {
       visit(writer, node.argument);
-      unaryOperator(writer, node.operator);
+
+      switch (node.operator) {
+        case "-":
+          writer.write(ByteCode.Neg);
+          break;
+        case "!":
+          writer.write(ByteCode.Not);
+          break;
+        case "+":
+          writer.write(ByteCode.Pos);
+          break;
+        case "~":
+          writer.write(ByteCode.BitNot);
+          break;
+        case "delete":
+          // TODO(qti3e);
+          writer.write(ByteCode.TODO);
+          break;
+        case "typeof":
+          writer.write(ByteCode.Type);
+          break;
+        case "void":
+          writer.write(ByteCode.Void);
+          break;
+      }
       break;
     }
 
@@ -124,104 +216,6 @@ export function visit(writer: Writer, node: estree.Node): void {
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
       console.log("TODO: " + node.type);
-      break;
-  }
-}
-
-function binaryOperator(writer: Writer, operator: estree.BinaryOperator): void {
-  switch (operator) {
-    case "==":
-      writer.write(ByteCode.EQ);
-      break;
-    case "!=":
-      writer.write(ByteCode.IEQ);
-      break;
-    case "===":
-      writer.write(ByteCode.EQS);
-      break;
-    case "!==":
-      writer.write(ByteCode.IEQS);
-      break;
-    case "<":
-      writer.write(ByteCode.LT);
-      break;
-    case "<=":
-      writer.write(ByteCode.LTE);
-      break;
-    case ">":
-      writer.write(ByteCode.GT);
-      break;
-    case ">=":
-      writer.write(ByteCode.GTE);
-      break;
-    case "<<":
-      writer.write(ByteCode.BLS);
-      break;
-    case ">>":
-      writer.write(ByteCode.BRS);
-      break;
-    case ">>>":
-      writer.write(ByteCode.BURS);
-      break;
-    case "+":
-      writer.write(ByteCode.Add);
-      break;
-    case "-":
-      writer.write(ByteCode.Sub);
-      break;
-    case "*":
-      writer.write(ByteCode.Mul);
-      break;
-    case "/":
-      writer.write(ByteCode.Div);
-      break;
-    case "%":
-      writer.write(ByteCode.Mod);
-      break;
-    case "**":
-      writer.write(ByteCode.Pow);
-      break;
-    case "|":
-      writer.write(ByteCode.BitOr);
-      break;
-    case "^":
-      writer.write(ByteCode.BitXor);
-      break;
-    case "&":
-      writer.write(ByteCode.BitAnd);
-      break;
-    case "instanceof":
-      writer.write(ByteCode.InstanceOf);
-      break;
-    case "in":
-      writer.write(ByteCode.In);
-      break;
-  }
-}
-
-function unaryOperator(writer: Writer, operator: estree.UnaryOperator): void {
-  switch (operator) {
-    case "-":
-      writer.write(ByteCode.Neg);
-      break;
-    case "!":
-      writer.write(ByteCode.Not);
-      break;
-    case "+":
-      writer.write(ByteCode.Pos);
-      break;
-    case "~":
-      writer.write(ByteCode.BitNot);
-      break;
-    case "delete":
-      // TODO(qti3e);
-      writer.write(ByteCode.TODO);
-      break;
-    case "typeof":
-      writer.write(ByteCode.Type);
-      break;
-    case "void":
-      writer.write(ByteCode.Void);
       break;
   }
 }
