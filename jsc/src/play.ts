@@ -12,6 +12,7 @@ import { dump } from "./dump";
 function main() {
   const source = `
   if (x) y++; else z--;
+  if (x) y++; else z--;
   1
 `;
 

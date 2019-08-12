@@ -123,3 +123,24 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.LdInt32]: 4,
   [ByteCode.LdUint32]: 4
 };
+
+export type JumpByteCode =
+  | ByteCode.Jmp
+  | ByteCode.JmpFalsePeek
+  | ByteCode.JmpFalsePop
+  | ByteCode.JmpFalseThenPop
+  | ByteCode.JmpTruePeek
+  | ByteCode.JmpTruePop
+  | ByteCode.JmpTrueThenPop;
+
+export function isJumpByteCode(bytecode: ByteCode): bytecode is JumpByteCode {
+  return (
+    bytecode === ByteCode.Jmp ||
+    bytecode === ByteCode.JmpFalsePeek ||
+    bytecode === ByteCode.JmpFalsePop ||
+    bytecode === ByteCode.JmpFalseThenPop ||
+    bytecode === ByteCode.JmpTruePeek ||
+    bytecode === ByteCode.JmpTruePop ||
+    bytecode === ByteCode.JmpTrueThenPop
+  );
+}

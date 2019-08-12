@@ -1,16 +1,7 @@
-import { ByteCode } from "./bytecode";
+import { ByteCode, JumpByteCode } from "./bytecode";
 import { Buffer } from "./buffer";
 import { Compiler } from "./compiler";
 import { Scope } from "./scope";
-
-export type JumpByteCode =
-  | ByteCode.Jmp
-  | ByteCode.JmpFalsePeek
-  | ByteCode.JmpFalsePop
-  | ByteCode.JmpFalseThenPop
-  | ByteCode.JmpTruePeek
-  | ByteCode.JmpTruePop
-  | ByteCode.JmpTrueThenPop;
 
 export type CompiledData = {
   codeSection: ArrayBuffer;

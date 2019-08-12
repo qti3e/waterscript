@@ -6,7 +6,7 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { ByteCode, byteCodeArgSize } from "./bytecode";
+import { ByteCode, byteCodeArgSize, isJumpByteCode } from "./bytecode";
 import { CompiledData } from "./writer";
 import { TextDecoder } from "./text_encoding";
 
@@ -21,12 +21,114 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
 
   result += ("+>" + sectionTitle).padEnd(80, "-") + "\n";
 
+  enum JumpDir {
+    S2E,
+    E2S
+  }
+  type JumpInfo = {
+    start: number;
+    end: number;
+    dir: JumpDir;
+    col: number;
+    done: boolean;
+  };
+  const jumps: JumpInfo[] = [];
+  const consumedCols: number[] = [];
+  const addJump = (from: number, to: number) => {
+    jumps.push({
+      start: from < to ? from : to,
+      end: from < to ? to : from,
+      dir: from < to ? JumpDir.S2E : JumpDir.E2S,
+      col: -1,
+      done: false
+    });
+  };
+  const getCol = () => {
+    for (let i = 1; ; i += 2) {
+      if (consumedCols.indexOf(i) < 0) {
+        consumedCols.push(i);
+        return i;
+      }
+    }
+  };
+  const freeCol = (col: number) => {
+    const index = consumedCols.indexOf(col);
+    if (index < 0) return;
+    consumedCols.splice(index, 1);
+  };
+  const renderJumps = (offset: number) => {
+    for (const jmp of jumps) {
+      if (jmp.start === offset) {
+        jmp.col = getCol();
+      }
+    }
+
+    if (consumedCols.length === 0) {
+      return "";
+    }
+
+    let max = Math.max(...consumedCols);
+    let ret = Array(max).fill(" ");
+
+    for (let i = 0; i <= max; ++i) {
+      for (const jmp of jumps) {
+        if (jmp.done) continue;
+        if (jmp.col !== i) continue;
+
+        ret[i] = "║";
+
+        if (jmp.start === offset) {
+          ret[0] = jmp.dir === JumpDir.S2E ? "═" : "<";
+          for (let j = 1; j < i; ++j) {
+            let char = "═";
+            if (ret[j] !== " ") {
+              char = "╬";
+            }
+            ret[j] = char;
+          }
+          ret[i] = jmp.dir === JumpDir.S2E ? "╗" : "╝";
+        }
+
+        if (jmp.end === offset) {
+          ret[0] = jmp.dir === JumpDir.S2E ? "<" : "═";
+          for (let j = 1; j < i; ++j) {
+            let char = "═";
+            if (ret[j] !== " ") {
+              char = "╬";
+            }
+            ret[j] = char;
+          }
+          ret[i] = jmp.dir === JumpDir.S2E ? "╝" : "╗";
+          jmp.done = true;
+          freeCol(jmp.col);
+        }
+
+        break;
+      }
+    }
+
+    return ret.join("");
+  };
+
   for (let i = 0; i < codeU8.length; ++i) {
     const bytecode: ByteCode = codeU8[i] as ByteCode;
     const argSize = byteCodeArgSize[bytecode] || 0;
 
+    if (isJumpByteCode(bytecode)) {
+      const to = readUint16(codeU8, i + 1);
+      addJump(i, to);
+    }
+
+    i += argSize;
+  }
+
+  for (let i = 0; i < codeU8.length; ++i) {
+    const bytecode: ByteCode = codeU8[i] as ByteCode;
+    const argSize = byteCodeArgSize[bytecode] || 0;
+    const offset = i;
+
     let line = " ";
-    line += hex2str(i, "00000000");
+    line += hex2str(offset, "00000000");
     line += " | ";
 
     for (let j = 0; j <= argSize; ++j) {
@@ -41,7 +143,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     line += "|";
 
     i += argSize;
-    result += line + "\n";
+    result += line + renderJumps(offset) + "\n";
   }
 
   result += "          +------SCOPE".padEnd(80, "-") + "\n";
@@ -66,7 +168,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
       line += " FUNCTION(" + hex2str(fnId) + ")";
       scopeCursor += 2;
     }
-    result += ("| ".padStart(12) + line).padEnd(79) + "|\n";
+    result += ("| ".padStart(12) + line).padEnd(79) + "|";
   }
 
   result += "          +----CONSTANT POOL".padEnd(80, "-") + "\n";
