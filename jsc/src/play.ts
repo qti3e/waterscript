@@ -23,6 +23,17 @@ function main() {
 
   }
 
+  while (x) {
+
+    if (y) {
+
+      while (z) {}
+
+    } else {
+
+    }
+
+  }
   p++;
 `;
 

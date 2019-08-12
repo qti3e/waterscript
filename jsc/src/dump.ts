@@ -68,8 +68,16 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
           ret[i] = botChar;
           for (let j = 1; j < i; ++j) {
             let char = "═";
-            if (ret[j] !== " ") {
-              char = "╬";
+            switch (ret[j]) {
+              case "║":
+                char = "╬";
+                break;
+              case "╝":
+                char = "╩";
+                break;
+              case "╗":
+                char = "╦";
+                break;
             }
             ret[j] = char;
           }
