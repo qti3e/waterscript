@@ -11,7 +11,7 @@ import { ByteCode } from "./bytecode";
 import { Writer } from "./writer";
 
 export function visit(writer: Writer, node: estree.Node): void {
-  switch (node.type) {
+  main: switch (node.type) {
     case "ExpressionStatement": {
       visit(writer, node.expression);
       break;
@@ -141,25 +141,25 @@ export function visit(writer: Writer, node: estree.Node): void {
       switch (node.value) {
         case true:
           writer.write(ByteCode.LdTrue);
-          break;
+          break main;
         case false:
           writer.write(ByteCode.LdFalse);
-          break;
+          break main;
         case null:
           writer.write(ByteCode.LdNull);
-          break;
+          break main;
         case Infinity:
           writer.write(ByteCode.LdInfinity);
-          break;
+          break main;
         case 0:
           writer.write(ByteCode.LdZero);
-          break;
+          break main;
         case 1:
           writer.write(ByteCode.LdOne);
-          break;
+          break main;
         case 2:
           writer.write(ByteCode.LdTwo);
-          break;
+          break main;
       }
 
       if (typeof node.value === "string") {
@@ -288,9 +288,6 @@ export function visit(writer: Writer, node: estree.Node): void {
       }
 
       writer.write(ByteCode.Asgn);
-
-      // TODO(qti3e)
-      node;
       break;
     }
 
