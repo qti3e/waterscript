@@ -51,11 +51,6 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
       }
     }
   };
-  const freeCol = (col: number) => {
-    const index = consumedCols.indexOf(col);
-    if (index < 0) return;
-    consumedCols.splice(index, 1);
-  };
   const renderJumps = (offset: number) => {
     for (const jmp of jumps) {
       if (jmp.start === offset) {
@@ -77,20 +72,18 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
 
         ret[i] = "║";
 
-        if (jmp.start === offset) {
-          ret[0] = jmp.dir === JumpDir.S2E ? "═" : "<";
-          for (let j = 1; j < i; ++j) {
-            let char = "═";
-            if (ret[j] !== " ") {
-              char = "╬";
-            }
-            ret[j] = char;
-          }
-          ret[i] = jmp.dir === JumpDir.S2E ? "╗" : "╝";
+        const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
+        const botChars = jmp.start === offset ? ["╗", "╝"] : ["╝", "╗"];
+
+        if (jmp.end === offset) {
+          jmp.done = true;
+          const index = consumedCols.indexOf(jmp.col);
+          if (index > -1) consumedCols.splice(index, 1);
         }
 
-        if (jmp.end === offset || offset < 0) {
-          ret[0] = jmp.dir === JumpDir.S2E ? "<" : "═";
+        if (jmp.start === offset || jmp.end === offset || offset < 0) {
+          ret[0] = headChars[jmp.dir === JumpDir.S2E ? 0 : 1];
+          ret[i] = botChars[jmp.dir === JumpDir.S2E ? 0 : 1];
           for (let j = 1; j < i; ++j) {
             let char = "═";
             if (ret[j] !== " ") {
@@ -98,9 +91,6 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
             }
             ret[j] = char;
           }
-          ret[i] = jmp.dir === JumpDir.S2E ? "╝" : "╗";
-          jmp.done = true;
-          freeCol(jmp.col);
         }
 
         break;
