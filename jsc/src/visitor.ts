@@ -8,7 +8,7 @@
 
 import * as estree from "estree";
 import { ByteCode } from "./bytecode";
-import { Writer } from "./writer";
+import { Writer, Jump } from "./writer";
 
 export function visit(writer: Writer, node: estree.Node): void {
   main: switch (node.type) {
@@ -358,6 +358,28 @@ export function visit(writer: Writer, node: estree.Node): void {
         throw new Error(
           "Advanced variable declarations are not implemented yet."
         );
+      }
+
+      break;
+    }
+
+    case "IfStatement": {
+      const alternate = !!node.alternate;
+      let jmp2: Jump;
+
+      visit(writer, node.test);
+      const jmp1 = writer.jmp(ByteCode.JmpFalsePop);
+      visit(writer, node.consequent);
+
+      if (alternate) {
+        jmp2 = writer.jmp(ByteCode.Jmp);
+      }
+
+      jmp1.next();
+
+      if (alternate) {
+        visit(writer, node.alternate!);
+        jmp2!.next();
       }
 
       break;

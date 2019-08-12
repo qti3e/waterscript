@@ -11,7 +11,8 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-i++;
+  if (x) y++; else z--;
+  1
 `;
 
   const context = new Compiler();

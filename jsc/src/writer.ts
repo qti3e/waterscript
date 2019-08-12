@@ -43,6 +43,9 @@ export class Writer {
     return {
       here: () => {
         this.codeSection.writeInt16(this.codeSection.getCursor() - 1, position);
+      },
+      next: () => {
+        this.codeSection.writeInt16(this.codeSection.getCursor(), position);
       }
     };
   }
@@ -60,4 +63,5 @@ export class Writer {
 
 export interface Jump {
   here(): void;
+  next(): void;
 }
