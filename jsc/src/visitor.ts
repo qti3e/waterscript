@@ -209,6 +209,19 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "MemberExpression": {
+      visit(writer, node.object);
+      if (node.computed) {
+        visit(writer, node.property);
+        writer.write(ByteCode.Prop);
+      } else {
+        writer.write(
+          ByteCode.NamedProp,
+          (node.property as estree.Identifier).name
+        );
+      }
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
