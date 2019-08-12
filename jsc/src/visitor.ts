@@ -385,6 +385,15 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "BlockStatement": {
+      writer.write(ByteCode.BlockIn);
+      for (const stmt of node.body) {
+        visit(writer, stmt);
+      }
+      writer.write(ByteCode.BlockOut);
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
