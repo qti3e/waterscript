@@ -89,7 +89,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
           ret[i] = jmp.dir === JumpDir.S2E ? "╗" : "╝";
         }
 
-        if (jmp.end === offset) {
+        if (jmp.end === offset || offset < 0) {
           ret[0] = jmp.dir === JumpDir.S2E ? "<" : "═";
           for (let j = 1; j < i; ++j) {
             let char = "═";
@@ -146,7 +146,8 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     result += line + renderJumps(offset) + "\n";
   }
 
-  result += "          +------SCOPE".padEnd(80, "-") + "\n";
+  result += "          +------SCOPE".padEnd(80, "-");
+  result += renderJumps(-1) + "\n";
 
   const scopeItemsLength = readUint16(scopeU8, 0);
   let scopeCursor = 2;

@@ -13,7 +13,6 @@ function main() {
   const source = `
   if (x) y++; else z--;
   if (x) y++; else z--;
-  1
 `;
 
   const context = new Compiler();
