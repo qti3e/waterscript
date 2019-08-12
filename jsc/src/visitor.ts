@@ -11,8 +11,6 @@ import { ByteCode } from "./bytecode";
 import { Writer, Jump, CompiledData } from "./writer";
 
 export function visit(writer: Writer, node: estree.Node): void {
-  let jmp1: Jump;
-
   switch (node.type) {
     case "ExpressionStatement": {
       visit(writer, node.expression);
@@ -101,12 +99,12 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "LogicalExpression": {
       visit(writer, node.left);
-      jmp1 = writer.jmp(
+      const jmp = writer.jmp(
         node.operator == "||" ? ByteCode.JmpTruePeek : ByteCode.JmpFalsePeek
       );
       writer.write(ByteCode.Pop);
       visit(writer, node.right);
-      jmp1.here();
+      jmp.here();
       break;
     }
 
