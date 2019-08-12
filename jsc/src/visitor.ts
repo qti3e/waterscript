@@ -385,6 +385,16 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "WhileStatement": {
+      const pos = writer.getPosition();
+      visit(writer, node.test);
+      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+      visit(writer, node.body);
+      writer.jmpTo(ByteCode.Jmp, pos);
+      jmp.next();
+      break;
+    }
+
     case "BlockStatement": {
       writer.write(ByteCode.BlockIn);
       for (const stmt of node.body) {

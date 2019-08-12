@@ -44,7 +44,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     });
   };
   const getCol = () => {
-    for (let i = 1; ; i += 2) {
+    for (let i = 3; ; i += 3) {
       if (consumedCols.indexOf(i) < 0) {
         consumedCols.push(i);
         return i;
@@ -73,7 +73,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
         ret[i] = "║";
 
         const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
-        const botChars = jmp.start === offset ? ["╗", "╝"] : ["╝", "╗"];
+        const botChar = jmp.start === offset ? "╗" : "╝";
 
         if (jmp.end === offset) {
           jmp.done = true;
@@ -83,7 +83,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
 
         if (jmp.start === offset || jmp.end === offset || offset < 0) {
           ret[0] = headChars[jmp.dir === JumpDir.S2E ? 0 : 1];
-          ret[i] = botChars[jmp.dir === JumpDir.S2E ? 0 : 1];
+          ret[i] = botChar;
           for (let j = 1; j < i; ++j) {
             let char = "═";
             if (ret[j] !== " ") {

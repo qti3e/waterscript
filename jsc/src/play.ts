@@ -11,7 +11,13 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
+  while (x) {
+
   if (x) {} else {}
+  i++;
+
+  }
+
 `;
 
   const context = new Compiler();

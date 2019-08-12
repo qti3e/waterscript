@@ -50,6 +50,15 @@ export class Writer {
       this.codeSection.writeUint32(index);
     }
   }
+
+  getPosition(): number {
+    return this.codeSection.getCursor();
+  }
+
+  jmpTo(type: JumpByteCode, pos: number): void {
+    this.codeSection.put(type);
+    this.codeSection.writeInt16(pos);
+  }
 }
 
 export interface Jump {
