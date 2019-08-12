@@ -13,11 +13,17 @@ function main() {
   const source = `
   while (x) {
 
-  if (x) {} else {}
-  i++;
+    if (y) {
+
+      while (z) {}
+
+    } else {
+
+    }
 
   }
 
+  p++;
 `;
 
   const context = new Compiler();

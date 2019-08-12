@@ -21,6 +21,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
 
   result += ("+>" + sectionTitle).padEnd(80, "-") + "\n";
 
+  // Codes for jump helper.
   enum JumpDir {
     S2E,
     E2S
@@ -33,7 +34,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     done: boolean;
   };
   const jumps: JumpInfo[] = [];
-  const consumedCols: number[] = [];
+  let max = 0;
   const addJump = (from: number, to: number) => {
     jumps.push({
       start: from < to ? from : to,
@@ -43,45 +44,26 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
       done: false
     });
   };
-  const getCol = () => {
-    for (let i = 3; ; i += 3) {
-      if (consumedCols.indexOf(i) < 0) {
-        consumedCols.push(i);
-        return i;
-      }
-    }
-  };
-  const renderJumps = (offset: number) => {
-    for (const jmp of jumps) {
-      if (jmp.start === offset) {
-        jmp.col = getCol();
-      }
-    }
 
-    if (consumedCols.length === 0) {
+  const renderJumps = (offset: number) => {
+    if (max === 0) {
       return "";
     }
 
-    let max = Math.max(...consumedCols);
     let ret = Array(max).fill(" ");
 
     for (let i = 0; i <= max; ++i) {
       for (const jmp of jumps) {
-        if (jmp.done) continue;
-        if (jmp.col !== i) continue;
+        if (jmp.col !== i || jmp.done || (offset > -1 && offset < jmp.start))
+          continue;
 
         ret[i] = "║";
-
-        const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
-        const botChar = jmp.start === offset ? "╗" : "╝";
-
-        if (jmp.end === offset) {
-          jmp.done = true;
-          const index = consumedCols.indexOf(jmp.col);
-          if (index > -1) consumedCols.splice(index, 1);
-        }
+        if (jmp.end === offset) jmp.done = true;
 
         if (jmp.start === offset || jmp.end === offset || offset < 0) {
+          const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
+          const botChar = jmp.start === offset ? "╗" : "╝";
+
           ret[0] = headChars[jmp.dir === JumpDir.S2E ? 0 : 1];
           ret[i] = botChar;
           for (let j = 1; j < i; ++j) {
@@ -97,7 +79,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
       }
     }
 
-    return ret.join("");
+    return ret.join("").trimRight();
   };
 
   for (let i = 0; i < codeU8.length; ++i) {
@@ -111,6 +93,38 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
 
     i += argSize;
   }
+
+  const getSize = (jmp: JumpInfo) => jmp.end - jmp.start;
+
+  jumps.sort((a, b) => getSize(a) - getSize(b));
+
+  // [col, start, end]
+  const consumedCols: [number, number, number][] = [];
+  const isFree = (jmp: JumpInfo, col: number) => {
+    for (const consumedCol of consumedCols) {
+      if (consumedCol[0] === col) {
+        const a0 = jmp.start;
+        const a1 = jmp.end;
+        const [, b0, b1] = consumedCol;
+        if (a0 <= b1 && b0 <= a1) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+
+  for (const jmp of jumps) {
+    for (let col = 2; ; col += 3) {
+      if (isFree(jmp, col)) {
+        jmp.col = col;
+        consumedCols.push([col, jmp.start, jmp.end]);
+        if (col > max) max = col;
+        break;
+      }
+    }
+  }
+  // End of codes for jump helper.
 
   for (let i = 0; i < codeU8.length; ++i) {
     const bytecode: ByteCode = codeU8[i] as ByteCode;
