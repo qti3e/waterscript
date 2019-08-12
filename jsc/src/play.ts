@@ -11,7 +11,7 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-a.b
+a.b[3 + 6]
 `;
 
   const context = new Compiler();

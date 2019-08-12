@@ -220,6 +220,7 @@ export function visit(writer: Writer, node: estree.Node): void {
           (node.property as estree.Identifier).name
         );
       }
+      break;
     }
 
     default:
