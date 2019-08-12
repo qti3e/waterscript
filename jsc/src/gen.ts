@@ -7,8 +7,6 @@
  */
 
 import * as estree from "estree";
-import * as walk from "acorn-walk";
-import { ByteCode } from "./bytecode";
 import { visit } from "./visitor";
 import { Writer, CompiledData } from "./writer";
 import { Compiler } from "./compiler";

@@ -11,10 +11,7 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-function abc() {
-}
-
-abc * 0;
+2.51
 `;
 
   const context = new Compiler();

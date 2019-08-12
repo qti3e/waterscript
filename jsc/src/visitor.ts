@@ -59,23 +59,53 @@ export function visit(writer: Writer, node: estree.Node): void {
         case null:
           writer.write(ByteCode.LdNull);
           break;
-        case NaN:
-          writer.write(ByteCode.LdNaN);
-          break;
-        case 1:
-          writer.write(ByteCode.LdOne);
+        case Infinity:
+          writer.write(ByteCode.LdInfinity);
           break;
         case 0:
           writer.write(ByteCode.LdZero);
           break;
-        default:
-          if (typeof node.value === "string") {
-            writer.write(ByteCode.LdStr, node.value);
-            break;
-          }
-          writer.write(ByteCode.TODO);
+        case 1:
+          writer.write(ByteCode.LdOne);
+          break;
+        case 2:
+          writer.write(ByteCode.LdTwo);
+          break;
       }
-      break;
+
+      if (typeof node.value === "string") {
+        writer.write(ByteCode.LdStr, node.value);
+        break;
+      }
+
+      if (typeof node.value === "number") {
+        const number = node.value;
+        const isInt32 = number === (number | 0);
+
+        if (isInt32) {
+          if (number < 0) {
+            writer.write(ByteCode.LdInt32);
+            writer.codeSection.writeInt32(number);
+          } else {
+            writer.write(ByteCode.LdUint32);
+            writer.codeSection.writeUint32(number);
+          }
+        } else {
+          if (number === Math.fround(number)) {
+            // 32 bit.
+            writer.write(ByteCode.LdFloat32);
+            writer.codeSection.writeFloat32(number);
+          } else {
+            // 64 bit.
+            writer.write(ByteCode.LdFloat64);
+            writer.codeSection.writeFloat64(number);
+          }
+        }
+
+        break;
+      }
+
+      throw new Error("Unexpected literal.");
     }
 
     case "Identifier": {

@@ -55,6 +55,8 @@ export enum ByteCode {
   InstanceOf = 0x2c,
   In = 0x2d,
   Next = 0x2e,
+  ArPush = 0x2f,
+  LdTwo = 0x30,
   // Data Stack with Constant Pool
   LdStr = 0x40,
   NamedProp = 0x41,
@@ -79,7 +81,11 @@ export enum ByteCode {
   BlockOut = 0x93,
   BlockIn = 0x94,
   // Byte codes with fixed size arguments
-  LdFunction = 0xa0
+  LdFunction = 0xa0,
+  LdFloat32 = 0xa1,
+  LdFloat64 = 0xa2,
+  LdInt32 = 0xa3,
+  LdUint32 = 0xa4
 }
 
 export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
@@ -100,5 +106,9 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.SetIsConst]: 4,
   [ByteCode.Const]: 4,
 
-  [ByteCode.LdFunction]: 2
+  [ByteCode.LdFunction]: 2,
+  [ByteCode.LdFloat32]: 4,
+  [ByteCode.LdFloat64]: 8,
+  [ByteCode.LdInt32]: 4,
+  [ByteCode.LdUint32]: 4
 };

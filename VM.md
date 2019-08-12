@@ -71,6 +71,8 @@ And there is `#` for `peek()`
 | 0x2c | InstanceOf                | $ instanceof $ |
 | 0x2d | In                        | $ in $         |
 | 0x2e | Next                      | \$(#.next())   |
+| 0x2f | ArPush                    | #2.push(\$1)   |
+| 0x30 | LdTwo                     | \$(2)          |
 
 ## Data Stack with Constant Pool
 
@@ -87,11 +89,11 @@ A reference to the constant pool is a Uint32.
 | 0x46 | SetIsConst | String     | Set `isConstant` flag on `CT` on.          |
 | 0x47 | Const      | String     | Let(`CT`) ; SetIsConst(`CT`)               |
 
-> Note `Let` and `Const` sets the `lexical-declreation` flag to true.
+> Note `Let` and `Const` sets the `lexical-deceleration` flag to true.
 
 > Var stores value to the global object to.
 
-> `var`, `let` and `const` each correspond to their behaviour in the JavaScript
+> `var`, `let` and `const` each correspond to their behavior in the JavaScript
 > itself.
 
 ## Control Flow
@@ -220,6 +222,10 @@ if (!value) {
 | Hex  | Name       | Arg size | Description                           |
 | ---- | ---------- | -------- | ------------------------------------- |
 | 0xa0 | LdFunction | 2 bytes  | Load function from the functions set. |
+| 0xa1 | LdFloat32  | 4 bytes  | Load a float 32 value.                |
+| 0xa2 | LdFloat64  | 8 bytes  | Load a float 64 value.                |
+| 0xa3 | LdInt32    | 4 bytes  | Load a int 32 value.                  |
+| 0xa4 | LdUint32   | 4 bytes  | Load a unsigned int 32 value.         |
 
 ## TODO
 
