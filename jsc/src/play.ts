@@ -11,7 +11,7 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  var x = 5;
+i++;
 `;
 
   const context = new Compiler();

@@ -291,6 +291,41 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "UpdateExpression": {
+      if (node.argument.type === "Identifier") {
+        writer.write(ByteCode.NamedRef, node.argument.name);
+      } else if (node.argument.type === "MemberExpression") {
+        visit(writer, node.argument.object);
+        if (node.argument.computed) {
+          visit(writer, node.argument.property);
+          writer.write(ByteCode.ComputedRef);
+        } else {
+          writer.write(
+            ByteCode.PropRef,
+            (node.argument.property as estree.Identifier).name
+          );
+        }
+      } else {
+        throw new Error("Unsupported update expression.");
+      }
+
+      if (node.prefix) {
+        writer.write(
+          node.operator === "++"
+            ? ByteCode.PrefixUpdateAdd
+            : ByteCode.PrefixUpdateSub
+        );
+      } else {
+        writer.write(
+          node.operator === "++"
+            ? ByteCode.PostfixUpdateAdd
+            : ByteCode.PostfixUpdateSub
+        );
+      }
+
+      break;
+    }
+
     case "VariableDeclaration": {
       writer.varKind = node.kind;
       for (const declaration of node.declarations) {

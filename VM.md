@@ -51,7 +51,7 @@ And there is `#` for `peek()`
 | 0x18 | Not                       | $(!$)          |
 | 0x19 | Neg                       | $(-$)          |
 | 0x1a | Pos                       | $(+$)          |
-| 0x1b | Asgn                      | $2 = \$1       |
+| 0x1b | Asgn                      | $2 = $(\$1)    |
 | 0x1c | Pop                       | \$             |
 | 0x1d | Type                      | $(typeof \$)   |
 | 0x1e | Void                      | Pop ; LdUndef  |
@@ -76,6 +76,10 @@ And there is `#` for `peek()`
 | 0x31 | Del                       | delete \$      |
 | 0x32 | ComputedRef               | $(Ref($, \$))  |
 | 0x33 | UnRefDup                  | \$(UnRef(#))   |
+| 0x34 | PostfixUpdateAdd          | i++            |
+| 0x35 | PostfixUpdateSub          | i--            |
+| 0x36 | PrefixUpdateAdd           | ++i            |
+| 0x37 | PrefixUpdateSub           | --i            |
 
 ## Data Stack with Constant Pool
 

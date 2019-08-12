@@ -60,6 +60,10 @@ export enum ByteCode {
   Del = 0x31,
   ComputedRef = 0x32,
   UnRefDup = 0x33,
+  PostfixUpdateAdd = 0x34,
+  PostfixUpdateSub = 0x35,
+  PrefixUpdateAdd = 0x36,
+  PrefixUpdateSub = 0x37,
   // Data Stack with Constant Pool
   LdStr = 0x40,
   NamedProp = 0x41,
