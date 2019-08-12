@@ -66,7 +66,7 @@ And there is `#` for `peek()`
 | 0x27 | LdArr                     | \$([])         |
 | 0x28 | LdObj                     | \$({})         |
 | 0x29 | LdThis                    | \$(this)       |
-| 0x2a | Dup                       | \$($, $)       |
+| 0x2a | Dup                       | \$(#)          |
 | 0x2b | Prop                      | $($[$])        |
 | 0x2c | InstanceOf                | $ instanceof $ |
 | 0x2d | In                        | $ in $         |
@@ -74,6 +74,8 @@ And there is `#` for `peek()`
 | 0x2f | ArPush                    | #2.push(\$1)   |
 | 0x30 | LdTwo                     | \$(2)          |
 | 0x31 | Del                       | delete \$      |
+| 0x32 | ComputedRef               | $(Ref($, \$))  |
+| 0x33 | UnRefDup                  | \$(UnRef(#))   |
 
 ## Data Stack with Constant Pool
 
@@ -89,6 +91,8 @@ A reference to the constant pool is a Uint32.
 | 0x45 | Let        | String     | Var(`CT`) ; Store(`CT`)                    |
 | 0x46 | SetIsConst | String     | Set `isConstant` flag on `CT` on.          |
 | 0x47 | Const      | String     | Let(`CT`) ; SetIsConst(`CT`)               |
+| 0x48 | NamedRef   | String     | RefStart; Named(`CT`); RefEnd;             |
+| 0x49 | PropRef    | String     | RefStart; NamedProp(`CT`); RefEnd;         |
 
 > Note `Let` and `Const` sets the `lexical-deceleration` flag to true.
 

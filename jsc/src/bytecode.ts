@@ -58,6 +58,8 @@ export enum ByteCode {
   ArPush = 0x2f,
   LdTwo = 0x30,
   Del = 0x31,
+  ComputedRef = 0x32,
+  UnRefDup = 0x33,
   // Data Stack with Constant Pool
   LdStr = 0x40,
   NamedProp = 0x41,
@@ -67,6 +69,8 @@ export enum ByteCode {
   Let = 0x45,
   SetIsConst = 0x46,
   Const = 0x47,
+  NamedRef = 0x48,
+  PropRef = 0x49,
   // Control Flow
   Jmp = 0x70,
   JmpTruePop = 0x71,
@@ -106,6 +110,8 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.Let]: 4,
   [ByteCode.SetIsConst]: 4,
   [ByteCode.Const]: 4,
+  [ByteCode.NamedRef]: 4,
+  [ByteCode.PropRef]: 4,
 
   [ByteCode.LdFunction]: 2,
   [ByteCode.LdFloat32]: 4,

@@ -223,6 +223,77 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "AssignmentExpression": {
+      if (node.left.type === "Identifier") {
+        writer.write(ByteCode.NamedRef, node.left.name);
+      } else if (node.left.type === "MemberExpression") {
+        visit(writer, node.left.object);
+        if (node.left.computed) {
+          visit(writer, node.left.property);
+          writer.write(ByteCode.ComputedRef);
+        } else {
+          writer.write(
+            ByteCode.PropRef,
+            (node.left.property as estree.Identifier).name
+          );
+        }
+      } else {
+        throw new Error("Unsupported assignment.");
+      }
+
+      if (node.operator !== "=") {
+        writer.write(ByteCode.UnRefDup);
+        visit(writer, node.right);
+
+        switch (node.operator) {
+          case "%=":
+            writer.write(ByteCode.Mod);
+            break;
+          case "&=":
+            writer.write(ByteCode.BitAnd);
+            break;
+          case "**=":
+            writer.write(ByteCode.Pow);
+            break;
+          case "*=":
+            writer.write(ByteCode.Mul);
+            break;
+          case "+=":
+            writer.write(ByteCode.Add);
+            break;
+          case "-=":
+            writer.write(ByteCode.Sub);
+            break;
+          case "/=":
+            writer.write(ByteCode.Div);
+            break;
+          case "<<=":
+            writer.write(ByteCode.BLS);
+            break;
+          case ">>=":
+            writer.write(ByteCode.BRS);
+            break;
+          case ">>>=":
+            writer.write(ByteCode.BURS);
+            break;
+          case "^=":
+            writer.write(ByteCode.BitXor);
+            break;
+          case "|=":
+            writer.write(ByteCode.BitOr);
+            break;
+        }
+      } else {
+        visit(writer, node.right);
+      }
+
+      writer.write(ByteCode.Asgn);
+
+      // TODO(qti3e)
+      node;
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
