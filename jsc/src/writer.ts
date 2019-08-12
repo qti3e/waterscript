@@ -22,6 +22,7 @@ export class Writer {
   readonly codeSection: Buffer = new Buffer(64);
   readonly constantPool: Buffer = new Buffer(128);
   readonly scope: Scope = new Scope();
+  varKind: "var" | "let" | "const" = "var";
 
   constructor(readonly compiler: Compiler) {
     this.codeSection.put(ByteCode.LdScope);

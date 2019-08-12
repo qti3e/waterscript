@@ -291,6 +291,43 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "VariableDeclaration": {
+      writer.varKind = node.kind;
+      for (const declaration of node.declarations) {
+        visit(writer, declaration);
+      }
+      break;
+    }
+
+    case "VariableDeclarator": {
+      if (node.init) {
+        visit(writer, node.init);
+      } else {
+        writer.write(ByteCode.LdUndef);
+      }
+
+      if (node.id.type === "Identifier") {
+        if (writer.varKind === "var") {
+          writer.scope.addVariable(node.id.name);
+        }
+
+        writer.write(
+          writer.varKind === "const"
+            ? ByteCode.Const
+            : writer.varKind === "let"
+            ? ByteCode.Let
+            : ByteCode.Store,
+          node.id.name
+        );
+      } else {
+        throw new Error(
+          "Advanced variable declarations are not implemented yet."
+        );
+      }
+
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
