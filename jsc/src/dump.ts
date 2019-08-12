@@ -168,7 +168,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
       line += " FUNCTION(" + hex2str(fnId) + ")";
       scopeCursor += 2;
     }
-    result += ("| ".padStart(12) + line).padEnd(79) + "|";
+    result += ("| ".padStart(12) + line).padEnd(79) + "|\n";
   }
 
   result += "          +----CONSTANT POOL".padEnd(80, "-") + "\n";
