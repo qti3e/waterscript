@@ -11,30 +11,9 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  while (x) {
-
-    if (y) {
-
-      while (z) {}
-
-    } else {
-
-    }
-
+  for (let i = 0; i < 5; ++i) {
+    const x = i || 3;
   }
-
-  while (x) {
-
-    if (y) {
-
-      while (z) {}
-
-    } else {
-
-    }
-
-  }
-  p++;
 `;
 
   const context = new Compiler();

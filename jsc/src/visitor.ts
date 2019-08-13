@@ -104,7 +104,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       );
       writer.write(ByteCode.Pop);
       visit(writer, node.right);
-      jmp.here();
+      jmp.next();
       break;
     }
 
@@ -392,6 +392,30 @@ export function visit(writer: Writer, node: estree.Node): void {
       visit(writer, node.body);
       writer.jmpTo(ByteCode.Jmp, pos);
       jmp.next();
+      break;
+    }
+
+    case "ForStatement": {
+      writer.write(ByteCode.BlockIn);
+
+      if (node.init) visit(writer, node.init);
+
+      const testPos = writer.getPosition();
+      if (node.test) {
+        visit(writer, node.test);
+      } else {
+        writer.write(ByteCode.LdTrue);
+      }
+
+      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+
+      visit(writer, node.body);
+
+      if (node.update) visit(writer, node.update);
+      writer.jmpTo(ByteCode.Jmp, testPos);
+      jmp.next();
+
+      writer.write(ByteCode.BlockOut);
       break;
     }
 
