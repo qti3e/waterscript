@@ -427,7 +427,14 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
-    case "EmptyStatement": {
+    case "ConditionalExpression": {
+      visit(writer, node.test);
+      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+      visit(writer, node.consequent);
+      const jmp2 = writer.jmp(ByteCode.Jmp);
+      jmp.next();
+      visit(writer, node.alternate);
+      jmp2.next();
       break;
     }
 
@@ -437,6 +444,10 @@ export function visit(writer: Writer, node: estree.Node): void {
         visit(writer, stmt);
       }
       writer.write(ByteCode.BlockOut);
+      break;
+    }
+
+    case "EmptyStatement": {
       break;
     }
 
