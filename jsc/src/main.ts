@@ -8,6 +8,7 @@
 
 import { Compiler } from "./compiler";
 import { dump } from "./dump";
+import { global } from "./util";
 
 export function compile(source: string) {
   const context = new Compiler();
@@ -17,10 +18,5 @@ export function compile(source: string) {
   return ret;
 }
 
-function getEval() {
-  return eval;
-}
-
-const global = getEval()("this");
 global.compile = compile;
 global.dump = dump;
