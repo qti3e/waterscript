@@ -542,6 +542,16 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "ReturnStatement": {
+      if (node.argument) {
+        visit(writer, node.argument);
+      } else {
+        writer.write(ByteCode.LdUndef);
+      }
+      writer.write(ByteCode.Ret);
+      break;
+    }
+
     case "ArrayExpression": {
       writer.write(ByteCode.LdArr);
 
@@ -557,13 +567,30 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
-    case "ReturnStatement": {
-      if (node.argument) {
-        visit(writer, node.argument);
-      } else {
-        writer.write(ByteCode.LdUndef);
+    case "ObjectExpression": {
+      writer.write(ByteCode.LdObj);
+      for (const property of node.properties) {
+        if (property.type === ("SpreadElement" as any))
+          throw new Error("Spread obj element is not implemented yet.");
+
+        if (property.kind !== "init")
+          throw new Error("Getter/Setter is not supported yet.");
+
+        // TODO(qti3e) ComputedRef and PropRef pop the object from the ds and
+        // they're not suited to be used here.
+        if (property.computed) {
+          visit(writer, property.key);
+          writer.write(ByteCode.ComputedRef);
+        } else {
+          writer.write(
+            ByteCode.PropRef,
+            (property.key as estree.Identifier).name
+          );
+        }
+
+        visit(writer, property.value);
+        writer.write(ByteCode.Asgn);
       }
-      writer.write(ByteCode.Ret);
       break;
     }
 

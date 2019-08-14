@@ -11,14 +11,9 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  function x() {
-    var ch = 0;
-    state.lastStringValue = "";
-    while (isUnicodePropertyNameCharacter(ch = state.current())) {
-      state.lastStringValue += codePointToString(ch);
-      state.advance();
-    }
-    return state.lastStringValue !== ""
+  var a = {
+    x: 5,
+    [p]: 1
   }
 `;
 
