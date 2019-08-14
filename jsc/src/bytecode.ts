@@ -103,7 +103,12 @@ export enum ByteCode {
   Call3 = 0xc3,
   Call = 0xc4,
   NewArg = 0xc5,
-  PushArg = 0xc6
+  PushArg = 0xc6,
+  New0 = 0xd0,
+  New1 = 0xd1,
+  New2 = 0xd2,
+  New3 = 0xd3,
+  New = 0x4
 }
 
 export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {

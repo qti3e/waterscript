@@ -505,6 +505,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "NewExpression":
     case "CallExpression": {
       const argsCount = node.arguments.length;
       const noSpread = node.arguments.every(a => a.type !== "SpreadElement");
@@ -516,13 +517,21 @@ export function visit(writer: Writer, node: estree.Node): void {
           visit(writer, arg);
         }
         writer.write(
-          argsCount === 3
-            ? ByteCode.Call3
+          node.type === "CallExpression"
+            ? argsCount === 3
+              ? ByteCode.Call3
+              : argsCount === 2
+              ? ByteCode.Call2
+              : argsCount === 1
+              ? ByteCode.Call1
+              : ByteCode.Call0
+            : argsCount === 3
+            ? ByteCode.New3
             : argsCount === 2
-            ? ByteCode.Call2
+            ? ByteCode.New2
             : argsCount === 1
-            ? ByteCode.Call1
-            : ByteCode.Call0
+            ? ByteCode.New1
+            : ByteCode.New0
         );
       } else {
         writer.write(ByteCode.NewArg);
@@ -536,7 +545,9 @@ export function visit(writer: Writer, node: estree.Node): void {
           }
         }
 
-        writer.write(ByteCode.Call);
+        writer.write(
+          node.type === "CallExpression" ? ByteCode.Call : ByteCode.New
+        );
       }
 
       break;

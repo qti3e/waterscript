@@ -248,6 +248,11 @@ if (!value) {
 | 0xc4 | Call    | Call \$ with a argument object.       |
 | 0xc5 | NewArg  | Push a new argument object to the ds. |
 | 0xc6 | PushArg | arg = $, pushArg(#, $)                |
+| 0xd0 | New0    | Like Call0 but create a new instance. |
+| 0xd1 | New1    | Like Call1 but create a new instance. |
+| 0xd2 | New2    | Like Call2 but create a new instance. |
+| 0xd3 | New3    | Like Call3 but create a new instance. |
+| 0xd4 | New     | Like Call but create a new instance.  |
 
 ## TODO
 
