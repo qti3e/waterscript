@@ -73,9 +73,11 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
                 char = "╬";
                 break;
               case "╝":
+              case "╩":
                 char = "╩";
                 break;
               case "╗":
+              case "╦":
                 char = "╦";
                 break;
             }
