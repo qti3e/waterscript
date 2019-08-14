@@ -557,6 +557,16 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "ReturnStatement": {
+      if (node.argument) {
+        visit(writer, node.argument);
+      } else {
+        writer.write(ByteCode.LdUndef);
+      }
+      writer.write(ByteCode.Ret);
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);

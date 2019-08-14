@@ -10,6 +10,7 @@ import * as estree from "estree";
 import { visit } from "./visitor";
 import { Writer, CompiledData } from "./writer";
 import { Compiler } from "./compiler";
+import { ByteCode } from "./bytecode";
 
 export function compileMain(
   compiler: Compiler,
@@ -38,6 +39,9 @@ export function compileFunction(
       }
       break;
   }
+
+  writer.write(ByteCode.LdUndef);
+  writer.write(ByteCode.Ret);
 
   const data = writer.getData();
   if (functionNode.loc) data.position = functionNode.loc.start;

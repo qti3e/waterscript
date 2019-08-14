@@ -22,7 +22,7 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
   let positionString = "";
   if (data.position) {
     const pos = data.position;
-    positionString = "(Loc " + pos.line + ":" + pos.line + ")---";
+    positionString = "(Loc " + pos.line + ":" + pos.column + ")---";
   }
 
   result += ("+>" + sectionTitle).padEnd(80 - positionString.length, "-");
