@@ -11,7 +11,15 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  a = [1, 2]
+  function x() {
+    var ch = 0;
+    state.lastStringValue = "";
+    while (isUnicodePropertyNameCharacter(ch = state.current())) {
+      state.lastStringValue += codePointToString(ch);
+      state.advance();
+    }
+    return state.lastStringValue !== ""
+  }
 `;
 
   const context = new Compiler();
