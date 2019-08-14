@@ -45,7 +45,7 @@ export class Writer {
   write(code: ByteCode, constantPoolData?: string): void {
     this.codeSection.put(code);
 
-    if (constantPoolData) {
+    if (constantPoolData !== undefined) {
       const index = this.constantPool.getCursor();
       this.constantPool.writeNetString16(constantPoolData);
       this.codeSection.writeUint32(index);
