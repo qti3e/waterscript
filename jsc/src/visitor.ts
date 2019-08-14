@@ -178,20 +178,20 @@ export function visit(writer: Writer, node: estree.Node): void {
         if (isInt32) {
           if (number < 0) {
             writer.write(ByteCode.LdInt32);
-            writer.codeSection.writeInt32(number);
+            writer.codeSection.setInt32(number);
           } else {
             writer.write(ByteCode.LdUint32);
-            writer.codeSection.writeUint32(number);
+            writer.codeSection.setUint32(number);
           }
         } else {
           if (number === Math.fround(number)) {
             // 32 bit.
             writer.write(ByteCode.LdFloat32);
-            writer.codeSection.writeFloat32(number);
+            writer.codeSection.setFloat32(number);
           } else {
             // 64 bit.
             writer.write(ByteCode.LdFloat64);
-            writer.codeSection.writeFloat64(number);
+            writer.codeSection.setFloat64(number);
           }
         }
 
@@ -221,7 +221,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "FunctionExpression": {
       const index = writer.compiler.requestVisit(node);
       writer.write(ByteCode.LdFunction);
-      writer.codeSection.writeUint16(index);
+      writer.codeSection.setUint16(index);
       // TODO(qti3e) Function name.
       break;
     }
@@ -229,7 +229,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "ArrowFunctionExpression": {
       const index = writer.compiler.requestVisit(node);
       writer.write(ByteCode.LdFunction);
-      writer.codeSection.writeUint16(index);
+      writer.codeSection.setUint16(index);
       // TODO(qti3e) Arrow function names in cases like:
       // let add5 = p => p + 5;
       // add5.name === "add5";

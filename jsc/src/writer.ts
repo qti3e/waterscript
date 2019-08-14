@@ -1,20 +1,19 @@
 import { ByteCode, JumpByteCode } from "./bytecode";
-import { Buffer } from "./buffer";
 import { Compiler } from "./compiler";
 import { Scope } from "./scope";
 import { Labels } from "./labels";
 import { Position } from "estree";
 
 export type CompiledData = {
-  codeSection: ArrayBuffer;
-  constantPool: ArrayBuffer;
-  scope: ArrayBuffer;
+  codeSection: WSBuffer;
+  constantPool: WSBuffer;
+  scope: WSBuffer;
   position?: Position;
 };
 
 export class Writer {
-  readonly codeSection: Buffer = new Buffer(64);
-  readonly constantPool: Buffer = new Buffer(128);
+  readonly codeSection: WSBuffer = new WSBuffer(64);
+  readonly constantPool: WSBuffer = new WSBuffer(128);
   readonly scope: Scope = new Scope();
   readonly labels: Labels = new Labels(this);
   varKind: "var" | "let" | "const" = "var";
@@ -25,9 +24,9 @@ export class Writer {
 
   getData(): CompiledData {
     return {
-      codeSection: this.codeSection.getSlicedBuffer(),
-      constantPool: this.constantPool.getSlicedBuffer(),
-      scope: this.scope.getArrayBuffer()
+      codeSection: this.codeSection,
+      constantPool: this.constantPool,
+      scope: this.scope.buffer
     };
   }
 
@@ -37,7 +36,7 @@ export class Writer {
 
     return {
       next: () => {
-        this.codeSection.writeUint16(this.codeSection.getCursor(), position);
+        this.codeSection.setUint16(this.codeSection.getCursor(), position);
       }
     };
   }
@@ -47,8 +46,8 @@ export class Writer {
 
     if (constantPoolData !== undefined) {
       const index = this.constantPool.getCursor();
-      this.constantPool.writeNetString16(constantPoolData);
-      this.codeSection.writeUint32(index);
+      this.constantPool.setNetString16(constantPoolData);
+      this.codeSection.setUint32(index);
     }
   }
 
@@ -58,7 +57,7 @@ export class Writer {
 
   jmpTo(type: JumpByteCode, pos: number): void {
     this.codeSection.put(type);
-    this.codeSection.writeInt16(pos);
+    this.codeSection.setInt16(pos);
   }
 }
 

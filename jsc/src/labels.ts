@@ -8,7 +8,6 @@
 
 import { Writer } from "./writer";
 import { ByteCode } from "./bytecode";
-import { Buffer } from "./buffer";
 
 export class Labels {
   private labelStack: LabelInfo[] = [];
@@ -61,7 +60,7 @@ class LabelInfo {
 
   constructor(
     public readonly name: string | undefined,
-    private readonly codeSection: Buffer
+    private readonly codeSection: WSBuffer
   ) {}
 
   jumpToEnd(): void {
@@ -72,7 +71,7 @@ class LabelInfo {
       return;
     }
 
-    this.codeSection.writeUint16(this.endPosition);
+    this.codeSection.setUint16(this.endPosition);
   }
 
   jumpToTest(): void {
@@ -83,7 +82,7 @@ class LabelInfo {
       return;
     }
 
-    this.codeSection.writeUint16(this.testPosition);
+    this.codeSection.setUint16(this.testPosition);
   }
 
   end(): void {
@@ -94,7 +93,7 @@ class LabelInfo {
     this.endPosition = position;
 
     for (const location of this.pendingEndJumps!) {
-      this.codeSection.writeUint16(position, location);
+      this.codeSection.setUint16(position, location);
     }
 
     this.pendingEndJumps = undefined;
@@ -108,7 +107,7 @@ class LabelInfo {
     this.testPosition = position;
 
     for (const location of this.pendingTestJumps!) {
-      this.codeSection.writeUint16(position, location);
+      this.codeSection.setUint16(position, location);
     }
 
     this.pendingTestJumps = undefined;

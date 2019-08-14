@@ -8,15 +8,22 @@
 
 import { ByteCode, byteCodeArgSize, isJumpByteCode } from "./bytecode";
 import { CompiledData } from "./writer";
-import { TextDecoder } from "./text_encoding";
 
-const textDecoder = new TextDecoder();
+// TODO(qti3e) Rewrite/Refactor this code.
+
+function toArray(buffer: WSBuffer): number[] {
+  const ret: number[] = [];
+  for (let i = 0; i < buffer.size; ++i) {
+    ret.push(buffer.get(i));
+  }
+  return ret;
+}
 
 export function dump(data: CompiledData, sectionName = "MAIN"): string {
   let result = "";
-  const codeU8 = new Uint8Array(data.codeSection);
-  const cpU8 = new Uint8Array(data.constantPool);
-  const scopeU8 = new Uint8Array(data.scope);
+  const codeU8 = toArray(data.codeSection);
+  const cpU8 = toArray(data.constantPool);
+  const scopeU8 = toArray(data.scope);
   const sectionTitle = "SECTION #" + sectionName;
 
   let positionString = "";
@@ -185,10 +192,8 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
   for (let i = 0; i < scopeItemsLength; ++i) {
     let line = "";
     const isFunction = scopeU8[scopeCursor];
-    const strLen = readUint16(scopeU8, scopeCursor + 1);
-    const start = scopeCursor + 3;
-    const name = textDecoder.decode(scopeU8.slice(start, start + strLen));
-    scopeCursor += 2 + strLen;
+    const name = data.scope.getNetString16(scopeCursor + 1);
+    scopeCursor += 2 + name.length * 2;
 
     line += "DEF " + name;
     if (isFunction) {
@@ -235,6 +240,6 @@ function hex2str(num: number, pad = "00"): string {
   return (pad + num.toString(16)).slice(-pad.length);
 }
 
-function readUint16(u8: Uint8Array, index: number): number {
+function readUint16(u8: number[], index: number): number {
   return (u8[index] << 8) + u8[index + 1];
 }

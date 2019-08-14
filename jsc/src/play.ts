@@ -8,6 +8,7 @@
 
 import { Compiler } from "./compiler";
 import { dump } from "./dump";
+import "./buffer.polyfill";
 
 function main() {
   const source = `
