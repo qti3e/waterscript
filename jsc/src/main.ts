@@ -6,10 +6,15 @@
  * \___,_\ \__|_|____/ \___|
  */
 
+import { Compiler } from "./compiler";
 import { dump } from "./dump";
 
 export function compile(source: string) {
-  // TODO(qti3e)
+  const context = new Compiler();
+  context.compile(source);
+
+  const ret = context.getCompiledProgram();
+  return ret;
 }
 
 function getEval() {
