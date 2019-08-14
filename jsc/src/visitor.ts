@@ -198,6 +198,11 @@ export function visit(writer: Writer, node: estree.Node): void {
         break;
       }
 
+      if (node.value instanceof RegExp) {
+        writer.write(ByteCode.RegExp, node.value.source);
+        break;
+      }
+
       throw new Error("Unexpected literal.");
     }
 
@@ -555,7 +560,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
-      console.log("TODO: " + node.type);
+      // console.log("TODO: " + node.type);
       break;
   }
 }

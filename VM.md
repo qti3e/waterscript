@@ -97,6 +97,7 @@ A reference to the constant pool is a Uint32.
 | 0x47 | Const      | String     | Let(`CT`) ; SetIsConst(`CT`)               |
 | 0x48 | NamedRef   | String     | RefStart; Named(`CT`); RefEnd;             |
 | 0x49 | PropRef    | String     | RefStart; NamedProp(`CT`); RefEnd;         |
+| 0x4a | RegExp     | String     | Create a RegExp with the given pattern.    |
 
 > Note `Let` and `Const` sets the `lexical-deceleration` flag to true.
 

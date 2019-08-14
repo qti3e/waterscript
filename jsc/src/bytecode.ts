@@ -75,6 +75,7 @@ export enum ByteCode {
   Const = 0x47,
   NamedRef = 0x48,
   PropRef = 0x49,
+  RegExp = 0x4a,
   // Control Flow
   Jmp = 0x70,
   JmpTruePop = 0x71,
@@ -124,6 +125,7 @@ export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {
   [ByteCode.Const]: 4,
   [ByteCode.NamedRef]: 4,
   [ByteCode.PropRef]: 4,
+  [ByteCode.RegExp]: 4,
 
   [ByteCode.LdFunction]: 2,
   [ByteCode.LdFloat32]: 4,
