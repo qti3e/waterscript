@@ -3,11 +3,13 @@ import { Buffer } from "./buffer";
 import { Compiler } from "./compiler";
 import { Scope } from "./scope";
 import { Labels } from "./labels";
+import { Position } from "estree";
 
 export type CompiledData = {
   codeSection: ArrayBuffer;
   constantPool: ArrayBuffer;
   scope: ArrayBuffer;
+  position?: Position;
 };
 
 export class Writer {

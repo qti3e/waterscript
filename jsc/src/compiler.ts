@@ -35,7 +35,7 @@ export class Compiler {
   }
 
   compile(text: string): void {
-    const node = parse(text);
+    const node = parse(text, { locations: true });
     this.main = compileMain(this, node as any);
 
     for (const fn of this.functionVisitQueue) {

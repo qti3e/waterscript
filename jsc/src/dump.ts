@@ -19,7 +19,14 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
   const scopeU8 = new Uint8Array(data.scope);
   const sectionTitle = "SECTION #" + sectionName;
 
-  result += ("+>" + sectionTitle).padEnd(80, "-") + "\n";
+  let positionString = "";
+  if (data.position) {
+    const pos = data.position;
+    positionString = "(Loc " + pos.line + ":" + pos.line + ")---";
+  }
+
+  result += ("+>" + sectionTitle).padEnd(80 - positionString.length, "-");
+  result += positionString + "\n";
 
   // Codes for jump helper.
   enum JumpDir {

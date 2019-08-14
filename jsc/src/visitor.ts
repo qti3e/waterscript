@@ -560,7 +560,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
-      // console.log("TODO: " + node.type);
+      console.log("TODO: " + node.type);
       break;
   }
 }

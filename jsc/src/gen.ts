@@ -39,5 +39,7 @@ export function compileFunction(
       break;
   }
 
-  return writer.getData();
+  const data = writer.getData();
+  if (functionNode.loc) data.position = functionNode.loc.start;
+  return data;
 }
