@@ -7,7 +7,7 @@
     "sourceMap": true,
     "downlevelIteration": true,
     "noEmit": true,
-    "lib": ["ES2015"],
+    "lib": ["es5"],
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
     "strict": true
