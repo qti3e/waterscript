@@ -11,10 +11,7 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  var a = {
-    x: 5,
-    [p]: 1
-  }
+  a[0], b[0]
 `;
 
   const context = new Compiler();

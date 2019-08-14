@@ -594,6 +594,14 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "SequenceExpression": {
+      for (const expression of node.expressions) {
+        visit(writer, expression);
+        writer.write(ByteCode.Pop);
+      }
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
