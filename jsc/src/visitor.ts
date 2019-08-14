@@ -386,21 +386,26 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "WhileStatement": {
+      const label = writer.labels.create();
       const pos = writer.getPosition();
+      label.test();
       visit(writer, node.test);
       const jmp = writer.jmp(ByteCode.JmpFalsePop);
       visit(writer, node.body);
       writer.jmpTo(ByteCode.Jmp, pos);
       jmp.next();
+      label.end();
       break;
     }
 
     case "ForStatement": {
+      const label = writer.labels.create();
       writer.write(ByteCode.BlockIn);
 
       if (node.init) visit(writer, node.init);
 
       const testPos = writer.getPosition();
+      label.test();
       if (node.test) {
         visit(writer, node.test);
       } else {
@@ -416,14 +421,18 @@ export function visit(writer: Writer, node: estree.Node): void {
       jmp.next();
 
       writer.write(ByteCode.BlockOut);
+      label.end();
       break;
     }
 
     case "DoWhileStatement": {
+      const label = writer.labels.create();
       const bodyPos = writer.getPosition();
+      label.test();
       visit(writer, node.body);
       visit(writer, node.test);
       writer.jmpTo(ByteCode.JmpTruePop, bodyPos);
+      label.end();
       break;
     }
 
@@ -444,6 +453,28 @@ export function visit(writer: Writer, node: estree.Node): void {
         visit(writer, stmt);
       }
       writer.write(ByteCode.BlockOut);
+      break;
+    }
+
+    case "LabeledStatement": {
+      writer.labels.setName(node.label.name);
+      visit(writer, node.body);
+      break;
+    }
+
+    case "BreakStatement": {
+      const labelInfo = writer.labels.getLabelInfo(
+        node.label ? node.label.name : undefined
+      );
+      labelInfo.jumpToEnd();
+      break;
+    }
+
+    case "ContinueStatement": {
+      const labelInfo = writer.labels.getLabelInfo(
+        node.label ? node.label.name : undefined
+      );
+      labelInfo.jumpToTest();
       break;
     }
 

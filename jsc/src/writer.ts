@@ -2,6 +2,7 @@ import { ByteCode, JumpByteCode } from "./bytecode";
 import { Buffer } from "./buffer";
 import { Compiler } from "./compiler";
 import { Scope } from "./scope";
+import { Labels } from "./labels";
 
 export type CompiledData = {
   codeSection: ArrayBuffer;
@@ -13,6 +14,7 @@ export class Writer {
   readonly codeSection: Buffer = new Buffer(64);
   readonly constantPool: Buffer = new Buffer(128);
   readonly scope: Scope = new Scope();
+  readonly labels: Labels = new Labels(this);
   varKind: "var" | "let" | "const" = "var";
 
   constructor(readonly compiler: Compiler) {
@@ -32,11 +34,8 @@ export class Writer {
     const position = this.codeSection.skip(2);
 
     return {
-      here: () => {
-        this.codeSection.writeInt16(this.codeSection.getCursor() - 1, position);
-      },
       next: () => {
-        this.codeSection.writeInt16(this.codeSection.getCursor(), position);
+        this.codeSection.writeUint16(this.codeSection.getCursor(), position);
       }
     };
   }
@@ -62,6 +61,5 @@ export class Writer {
 }
 
 export interface Jump {
-  here(): void;
   next(): void;
 }
