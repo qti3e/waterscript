@@ -64,7 +64,10 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
           const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
           const botChar = jmp.start === offset ? "╗" : "╝";
 
-          ret[0] = headChars[jmp.dir === JumpDir.S2E ? 0 : 1];
+          if (ret[0] !== "<") {
+            ret[0] = headChars[jmp.dir === JumpDir.S2E ? 0 : 1];
+          }
+
           ret[i] = botChar;
           for (let j = 1; j < i; ++j) {
             let char = "═";
