@@ -94,7 +94,15 @@ export enum ByteCode {
   LdFloat32 = 0xa1,
   LdFloat64 = 0xa2,
   LdInt32 = 0xa3,
-  LdUint32 = 0xa4
+  LdUint32 = 0xa4,
+  // Calls
+  Call0 = 0xc0,
+  Call1 = 0xc1,
+  Call2 = 0xc2,
+  Call3 = 0xc3,
+  Call = 0xc4,
+  NewArg = 0xc5,
+  PushArg = 0xc6
 }
 
 export const byteCodeArgSize: Partial<Record<ByteCode, number>> = {

@@ -236,10 +236,21 @@ if (!value) {
 | 0xa3 | LdInt32    | 4 bytes  | Load a int 32 value.                  |
 | 0xa4 | LdUint32   | 4 bytes  | Load a unsigned int 32 value.         |
 
+# Calls
+
+| Hex  | Name    | Description                           |
+| ---- | ------- | ------------------------------------- |
+| 0xc0 | Call0   | Call \$ without any parameters.       |
+| 0xc1 | Call1   | Call \$ with only one parameters.     |
+| 0xc2 | Call2   | Call \$ with two parameters.          |
+| 0xc3 | Call3   | Call \$ with three parameters.          |
+| 0xc4 | Call    | Call \$ with a argument object.       |
+| 0xc5 | NewArg  | Push a new argument object to the ds. |
+| 0xc6 | PushArg | arg = $, pushArg(#, $)                |
+
 ## TODO
 
 - [ ] Try catch
-- [ ] Calls and arguments
 - [ ] Jump tables (to implement switch)
 
 # Calling Convention

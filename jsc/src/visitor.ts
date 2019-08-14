@@ -500,6 +500,43 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "CallExpression": {
+      const argsCount = node.arguments.length;
+      const noSpread = node.arguments.every(a => a.type !== "SpreadElement");
+
+      visit(writer, node.callee);
+
+      if (noSpread && argsCount < 4) {
+        for (const arg of node.arguments) {
+          visit(writer, arg);
+        }
+        writer.write(
+          argsCount === 3
+            ? ByteCode.Call3
+            : argsCount === 2
+            ? ByteCode.Call2
+            : argsCount === 1
+            ? ByteCode.Call1
+            : ByteCode.Call0
+        );
+      } else {
+        writer.write(ByteCode.NewArg);
+
+        for (const arg of node.arguments) {
+          if (arg.type === "SpreadElement") {
+            throw new Error("Spread argument is not implemented yet.");
+          } else {
+            visit(writer, arg);
+            writer.write(ByteCode.PushArg);
+          }
+        }
+
+        writer.write(ByteCode.Call);
+      }
+
+      break;
+    }
+
     default:
       // TODO(qti3e)
       writer.write(ByteCode.TODO);
