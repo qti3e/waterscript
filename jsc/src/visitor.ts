@@ -12,6 +12,10 @@ import { Writer, Jump } from "./writer";
 
 export function visit(writer: Writer, node: estree.Node): void {
   main: switch (node.type) {
+    case "EmptyStatement": {
+      break;
+    }
+
     case "ExpressionStatement": {
       visit(writer, node.expression);
       break;
@@ -496,10 +500,6 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
-    case "EmptyStatement": {
-      break;
-    }
-
     case "CallExpression": {
       const argsCount = node.arguments.length;
       const noSpread = node.arguments.every(a => a.type !== "SpreadElement");
@@ -532,6 +532,21 @@ export function visit(writer: Writer, node: estree.Node): void {
         }
 
         writer.write(ByteCode.Call);
+      }
+
+      break;
+    }
+
+    case "ArrayExpression": {
+      writer.write(ByteCode.LdArr);
+
+      for (const element of node.elements) {
+        if (element.type === "SpreadElement") {
+          throw new Error("Spread array element is not implemented yet.");
+        } else {
+          visit(writer, element);
+          writer.write(ByteCode.ArPush);
+        }
       }
 
       break;

@@ -11,7 +11,7 @@ import { dump } from "./dump";
 
 function main() {
   const source = `
-  fn(0, 1, 2 + 1, true);
+  a = [1, 2]
 `;
 
   const context = new Compiler();
