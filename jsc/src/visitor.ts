@@ -209,6 +209,24 @@ export function visit(writer: Writer, node: estree.Node): void {
       break;
     }
 
+    case "FunctionExpression": {
+      const index = writer.compiler.requestVisit(node);
+      writer.write(ByteCode.LdFunction);
+      writer.codeSection.writeUint16(index);
+      // TODO(qti3e) Function name.
+      break;
+    }
+
+    case "ArrowFunctionExpression": {
+      const index = writer.compiler.requestVisit(node);
+      writer.write(ByteCode.LdFunction);
+      writer.codeSection.writeUint16(index);
+      // TODO(qti3e) Arrow function names in cases like:
+      // let add5 = p => p + 5;
+      // add5.name === "add5";
+      break;
+    }
+
     case "MemberExpression": {
       visit(writer, node.object);
       if (node.computed) {
