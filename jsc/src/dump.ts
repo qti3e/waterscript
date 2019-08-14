@@ -80,6 +80,9 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
               case "╦":
                 char = "╦";
                 break;
+              case "<":
+                char = "<";
+                break;
             }
             ret[j] = char;
           }
