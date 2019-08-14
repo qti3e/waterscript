@@ -1,3 +1,4 @@
+require("./dist/buffer");
 require("./dist/bundle");
 
 const fs = require("fs");
