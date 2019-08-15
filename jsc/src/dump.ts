@@ -7,7 +7,7 @@
  */
 
 import { ByteCode, byteCodeArgSize, isJumpByteCode } from "./bytecode";
-import { CompiledData } from "./writer";
+import { CompiledData } from "./compiler";
 
 enum JumpDir {
   S2E,

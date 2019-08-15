@@ -8,8 +8,8 @@
 
 import * as estree from "estree";
 import { visit } from "./visitor";
-import { Writer, CompiledData } from "./writer";
-import { Compiler } from "./compiler";
+import { Writer } from "./writer";
+import { Compiler, CompiledData } from "./compiler";
 import { ByteCode } from "./bytecode";
 
 export function compileMain(
