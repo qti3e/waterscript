@@ -6,4 +6,14 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-export { VM } from "./vm";
+import { VM } from "./vm";
+import "../src/buffer.polyfill";
+
+function main() {
+  const vm = new VM();
+  vm.compileAndExec(`
+  null
+  `);
+}
+
+main();

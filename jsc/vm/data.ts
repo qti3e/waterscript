@@ -82,3 +82,17 @@ export const Undefined: NullableValue = {
   type: DataType.NullableValue,
   undefined: true
 };
+
+export const True: PrimitiveValue = {
+  type: DataType.PrimitiveValue,
+  value: true,
+  // TODO(qti3e)
+  props: new Obj()
+};
+
+export const False: PrimitiveValue = {
+  type: DataType.PrimitiveValue,
+  value: false,
+  // TODO(qti3e)
+  props: new Obj()
+};
