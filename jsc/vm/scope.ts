@@ -23,7 +23,7 @@ export class Scope {
     }
   }
 
-  find(name: string): Value {
+  find(name: string): Value | undefined {
     if (this.table.has(name)) {
       return this.table.get(name)!;
     }
@@ -31,12 +31,10 @@ export class Scope {
     if (this.parent) {
       return this.parent.find(name);
     }
-
-    return Undefined;
   }
 
-  findRef(name: string): Reference | undefined {
-    if (this.table.has(name)) {
+  findRef(name: string): Reference {
+    if (!this.parent || this.table.has(name)) {
       return {
         type: DataType.ScopeReference,
         scope: this,
@@ -44,9 +42,7 @@ export class Scope {
       };
     }
 
-    if (this.parent) {
-      return this.parent.findRef(name);
-    }
+    return this.parent.findRef(name);
   }
 
   def(name: string, canAssignToBlock = false, init: Value = Undefined): void {

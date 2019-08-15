@@ -12,12 +12,8 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  var x = 4;
-  var rp = 4;
-  var rz = 4;
-  function t() {}
-  function t$A() {}
-  for (let i = 0; i < 4; ++i) {}
+  let i = 0;
+  i += 4;
 `;
 
   const context = new Compiler();

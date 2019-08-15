@@ -14,7 +14,10 @@ function main() {
   const vm = new VM();
 
   const ret = vm.compileAndExec(`
-  true ? "Hey" : "Hello"
+  let i = 0;
+  let j
+  j = i = 5;
+  j + 2
   `);
 
   console.log(toJSValue(ret));

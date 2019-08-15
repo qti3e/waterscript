@@ -4,7 +4,10 @@ import {
   DataType,
   getValue,
   jsValue2VM,
-  FunctionValue
+  FunctionValue,
+  Reference,
+  setToRef,
+  getRef
 } from "./data";
 import {
   Undefined,
@@ -374,6 +377,46 @@ export function exec(
           dataStack.pop();
           nextCursor = offset;
         }
+        break;
+      }
+
+      case ByteCode.Let: {
+        const value = getValue(dataStack.pop());
+        const offset = codeSection.getUint32(cursor + 1);
+        const name = constantPool.getNetString16(offset);
+        callScope.def(name, true, value);
+        break;
+      }
+
+      case ByteCode.Named: {
+        const offset = codeSection.getUint32(cursor + 1);
+        const name = constantPool.getNetString16(offset);
+        const value = callScope.find(name);
+        if (!value) throw new ReferenceError(name + " is not defined");
+        dataStack.push(value);
+        break;
+      }
+
+      case ByteCode.NamedRef: {
+        const offset = codeSection.getUint32(cursor + 1);
+        const name = constantPool.getNetString16(offset);
+        const ref = callScope.findRef(name);
+        dataStack.push(ref);
+        break;
+      }
+
+      case ByteCode.Asgn: {
+        const value = getValue(dataStack.pop());
+        const ref = dataStack.pop() as Reference;
+        dataStack.push(value);
+        setToRef(ref, value);
+        break;
+      }
+
+      case ByteCode.UnRefDup: {
+        const ref = dataStack.peek() as Reference;
+        const value = getRef(ref);
+        dataStack.push(value);
         break;
       }
 

@@ -123,7 +123,7 @@ export function setToRef(ref: Reference, value: Value): void {
 export function getRef(ref: Reference): Value {
   switch (ref.type) {
     case DataType.ScopeReference:
-      return ref.scope.find(ref.name);
+      return ref.scope.find(ref.name)!;
     case DataType.ObjectReference:
       return ref.object.get(ref.property);
   }

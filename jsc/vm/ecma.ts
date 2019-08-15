@@ -18,8 +18,7 @@ import {
   BooleanValue,
   isCallable,
   StringValue,
-  NumberValue,
-  jsValue2VM
+  NumberValue
 } from "./data";
 import { assert } from "./util";
 import { Obj } from "./obj";
