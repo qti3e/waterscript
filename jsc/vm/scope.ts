@@ -6,10 +6,10 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { Data } from "./data";
+import { Value, Reference, DataType, Undefined } from "./data";
 
 export class Scope {
-  private table: Map<string, Data | null> = new Map();
+  private table: Map<string, Value | null> = new Map();
 
   constructor(
     private readonly isBlockScope: boolean,
@@ -20,13 +20,29 @@ export class Scope {
     }
   }
 
-  find(name: string): Data | undefined {
+  find(name: string): Value {
     if (this.table.has(name)) {
       return this.table.get(name)!;
     }
 
     if (this.parent) {
       return this.parent.find(name);
+    }
+
+    return Undefined;
+  }
+
+  findRef(name: string): Reference | undefined {
+    if (this.table.has(name)) {
+      return {
+        type: DataType.ScopeReference,
+        scope: this,
+        name
+      };
+    }
+
+    if (this.parent) {
+      return this.parent.findRef(name);
     }
   }
 
@@ -41,7 +57,7 @@ export class Scope {
     }
   }
 
-  set(name: string, value: Data): void {
+  set(name: string, value: Value): void {
     if (!this.parent || this.table.has(name)) {
       this.table.set(name, value);
       return;

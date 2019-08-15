@@ -8,12 +8,19 @@
 
 import * as estree from "estree";
 import { parse } from "acorn";
-import { CompiledData } from "./writer";
 import { compileFunction, compileMain } from "./gen";
+import { Position } from "estree";
 
 interface VisitQueueEntity {
   index: number;
   node: estree.Function;
+}
+
+export interface CompiledData {
+  codeSection: WSBuffer;
+  constantPool: WSBuffer;
+  scope: WSBuffer;
+  position?: Position;
 }
 
 export interface CompiledProgram {

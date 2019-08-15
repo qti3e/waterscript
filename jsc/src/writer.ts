@@ -7,17 +7,9 @@
  */
 
 import { ByteCode, JumpByteCode } from "./bytecode";
-import { Compiler } from "./compiler";
+import { Compiler, CompiledData } from "./compiler";
 import { Scope } from "./scope";
 import { Labels } from "./labels";
-import { Position } from "estree";
-
-export type CompiledData = {
-  codeSection: WSBuffer;
-  constantPool: WSBuffer;
-  scope: WSBuffer;
-  position?: Position;
-};
 
 export class Writer {
   readonly codeSection: WSBuffer = new WSBuffer(64);
