@@ -16,7 +16,7 @@ interface VisitQueueEntity {
   node: estree.Function;
 }
 
-interface CompiledProgram {
+export interface CompiledProgram {
   main: CompiledData;
   functions: CompiledData[];
 }
