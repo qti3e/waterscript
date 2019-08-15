@@ -9,65 +9,188 @@
 import { ByteCode, byteCodeArgSize, isJumpByteCode } from "./bytecode";
 import { CompiledData } from "./writer";
 
-// TODO(qti3e) Rewrite/Refactor this code.
-
-function toArray(buffer: WSBuffer): number[] {
-  const ret: number[] = [];
-  for (let i = 0; i < buffer.size; ++i) {
-    ret.push(buffer.get(i));
-  }
-  return ret;
+enum JumpDir {
+  S2E,
+  E2S
 }
 
-export function dump(data: CompiledData, sectionName = "MAIN"): string {
-  let result = "";
-  const codeU8 = toArray(data.codeSection);
-  const cpU8 = toArray(data.constantPool);
-  const scopeU8 = toArray(data.scope);
-  const sectionTitle = "SECTION #" + sectionName;
+interface JumpInfo {
+  start: number;
+  end: number;
+  dir: JumpDir;
+  col: number;
+  done: boolean;
+}
 
-  let positionString = "";
-  if (data.position) {
-    const pos = data.position;
-    positionString = "(Loc " + pos.line + ":" + pos.column + ")---";
+class Dumper {
+  private jumps: JumpInfo[] = [];
+  private jmpMaxCol: number = 0;
+
+  constructor(
+    private readonly data: CompiledData,
+    private readonly sectionName: string
+  ) {}
+
+  forEachByteCode(cb: (bc: ByteCode, args: number[], pos: number) => void) {
+    const codeSection = this.data.codeSection;
+    for (let cursor = 0; cursor < codeSection.size; ++cursor) {
+      const bytecode: ByteCode = codeSection.get(cursor) as ByteCode;
+      const argSize = byteCodeArgSize[bytecode] || 0;
+      const args: number[] = [];
+
+      for (let i = 1; i <= argSize; ++i) {
+        args.push(codeSection.get(cursor + i));
+      }
+
+      cb(bytecode, args, cursor);
+
+      cursor += argSize;
+    }
   }
 
-  result += ("+>" + sectionTitle).padEnd(80 - positionString.length, "-");
-  result += positionString + "\n";
+  dump(): string {
+    this.initJumps();
 
-  // Codes for jump helper.
-  enum JumpDir {
-    S2E,
-    E2S
-  }
-  type JumpInfo = {
-    start: number;
-    end: number;
-    dir: JumpDir;
-    col: number;
-    done: boolean;
-  };
-  const jumps: JumpInfo[] = [];
-  let max = 0;
-  const addJump = (from: number, to: number) => {
-    jumps.push({
-      start: from < to ? from : to,
-      end: from < to ? to : from,
-      dir: from < to ? JumpDir.S2E : JumpDir.E2S,
-      col: -1,
-      done: false
+    let ret = "";
+    ret += this.renderHeader() + "\n";
+
+    this.forEachByteCode((bc, args, pos) => {
+      ret += this.renderByteCodeRow(pos, bc, [bc, ...args]);
+      ret += this.renderJumpHelper(pos) + "\n";
     });
-  };
 
-  const renderJumps = (offset: number) => {
-    if (max === 0) {
+    ret += this.renderScopeHeader();
+    ret += this.renderJumpHelper(-1) + "\n";
+    ret += this.renderScopeContent().join("\n") + "\n";
+    ret += this.renderConstantsHeader() + "\n";
+    ret += this.renderConstantsContent().join("\n");
+
+    return ret;
+  }
+
+  renderByteCodeRow(
+    offset: number,
+    bytecode: ByteCode,
+    bytes: number[]
+  ): string {
+    let line = " ";
+    line += hex2str(offset, 8);
+    line += " | ";
+
+    for (let j = 0; j < bytes.length; ++j) {
+      line += hex2str(bytes[j]) + " ";
+    }
+
+    line = line.padEnd(59);
+    line += "| ";
+    line += ByteCode[bytecode];
+
+    line = line.padEnd(79);
+    line += "|";
+
+    return line;
+  }
+
+  renderScopeHeader(): string {
+    return "          +------SCOPE".padEnd(80, "-");
+  }
+
+  renderScopeContent(): string[] {
+    const result: string[] = [];
+    const scope = this.data.scope;
+    const itemsCount = scope.getUint16(0);
+
+    if (itemsCount === 0) {
+      return [this.renderEmpty()];
+    }
+
+    let cursor = 2;
+
+    for (let i = 0; i < itemsCount; ++i) {
+      let line = "";
+      const isFunction = scope.get(cursor);
+      const name = scope.getNetString16(cursor + 1);
+      cursor += 3 + name.length * 2;
+
+      line += "DEF " + name;
+
+      if (isFunction) {
+        const fnId = scope.getUint16(cursor);
+        line += " FUNCTION(" + hex2str(fnId) + ")";
+        cursor += 2;
+      }
+
+      line = ("| ".padStart(12) + line).padEnd(79) + "|";
+      result.push(line);
+    }
+
+    return result;
+  }
+
+  renderConstantsHeader(): string {
+    return "          +----CONSTANT POOL".padEnd(80, "-");
+  }
+
+  renderConstantsContent(): string[] {
+    const result: string[] = [];
+    const constantPool = this.data.constantPool;
+    const size = constantPool.size;
+
+    if (size === 0) {
+      return [this.renderEmpty()];
+    }
+
+    for (let i = 0; i < size; i += 16) {
+      let line = " ";
+      line += hex2str(i, 8);
+      line += " | ";
+
+      for (let j = 0; j < 16 && i + j < size; ++j) {
+        if (j === 8) line += "  ";
+        line += hex2str(constantPool.get(i + j));
+      }
+
+      line = line.padEnd(62);
+      line += "|";
+
+      for (let j = 0; j < 16 && i + j < size; ++j) {
+        const c = constantPool.get(i + j);
+        line += c >= 0x20 && c <= 0x7e ? String.fromCharCode(c) : ".";
+      }
+
+      line = line.padEnd(79) + "|";
+
+      result.push(line);
+    }
+
+    return result;
+  }
+
+  renderEmpty(): string {
+    return "|".padStart(11) + "EMPTY".padStart(34).padEnd(68) + "|";
+  }
+
+  renderHeader(): string {
+    const pos = this.data.position;
+    const positionString = pos
+      ? "(Loc " + pos.line + ":" + pos.column + ")---"
+      : "";
+    return (
+      ("+>Section #" + this.sectionName)
+        .toUpperCase()
+        .padEnd(80 - positionString.length, "-") + positionString
+    );
+  }
+
+  renderJumpHelper(offset: number): string {
+    if (this.jmpMaxCol === 0) {
       return "";
     }
 
-    let ret = Array(max).fill(" ");
+    let ret = Array(this.jmpMaxCol).fill(" ");
 
-    for (let i = 0; i <= max; ++i) {
-      for (const jmp of jumps) {
+    for (let i = 0; i <= this.jmpMaxCol; ++i) {
+      for (const jmp of this.jumps) {
         if (jmp.col !== i || jmp.done || (offset > -1 && offset < jmp.start))
           continue;
 
@@ -110,136 +233,74 @@ export function dump(data: CompiledData, sectionName = "MAIN"): string {
     }
 
     return ret.join("").trimRight();
-  };
-
-  for (let i = 0; i < codeU8.length; ++i) {
-    const bytecode: ByteCode = codeU8[i] as ByteCode;
-    const argSize = byteCodeArgSize[bytecode] || 0;
-
-    if (isJumpByteCode(bytecode)) {
-      const to = readUint16(codeU8, i + 1);
-      addJump(i, to);
-    }
-
-    i += argSize;
   }
 
-  const getSize = (jmp: JumpInfo) => jmp.end - jmp.start;
+  initJumps(): void {
+    // Find all of the jump instructions.
+    this.forEachByteCode((bc, args, pos) => {
+      if (isJumpByteCode(bc)) {
+        const to = readUint16(args);
+        this.addJump(pos, to);
+      }
+    });
 
-  jumps.sort((a, b) => getSize(a) - getSize(b));
+    // Sort jumps by their length. (How far the jumps are)
+    // This way the jumps that are smaller will be inside
+    // larger jumps.
+    const getSize = (jmp: JumpInfo) => jmp.end - jmp.start;
+    this.jumps.sort((a, b) => getSize(a) - getSize(b));
 
-  // [col, start, end]
-  const consumedCols: [number, number, number][] = [];
-  const isFree = (jmp: JumpInfo, col: number) => {
-    for (const consumedCol of consumedCols) {
-      if (consumedCol[0] === col) {
-        const a0 = jmp.start;
-        const a1 = jmp.end;
-        const [, b0, b1] = consumedCol;
-        if (a0 <= b1 && b0 <= a1) {
-          return false;
+    // Store consumed cols for each row so they don't overlap.
+    // [col, start, end]
+    const consumedCols: [number, number, number][] = [];
+
+    const isFree = (jmp: JumpInfo, col: number) => {
+      for (const consumedCol of consumedCols) {
+        if (consumedCol[0] === col) {
+          const a0 = jmp.start;
+          const a1 = jmp.end;
+          const [, b0, b1] = consumedCol;
+          if (a0 <= b1 && b0 <= a1) {
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
+    // Assign a column to each jump.
+    for (const jmp of this.jumps) {
+      for (let col = 2; ; col += 3) {
+        if (isFree(jmp, col)) {
+          jmp.col = col;
+          consumedCols.push([col, jmp.start, jmp.end]);
+          if (col > this.jmpMaxCol) this.jmpMaxCol = col;
+          break;
         }
       }
     }
-    return true;
-  };
-
-  for (const jmp of jumps) {
-    for (let col = 2; ; col += 3) {
-      if (isFree(jmp, col)) {
-        jmp.col = col;
-        consumedCols.push([col, jmp.start, jmp.end]);
-        if (col > max) max = col;
-        break;
-      }
-    }
-  }
-  // End of codes for jump helper.
-
-  for (let i = 0; i < codeU8.length; ++i) {
-    const bytecode: ByteCode = codeU8[i] as ByteCode;
-    const argSize = byteCodeArgSize[bytecode] || 0;
-    const offset = i;
-
-    let line = " ";
-    line += hex2str(offset, "00000000");
-    line += " | ";
-
-    for (let j = 0; j <= argSize; ++j) {
-      line += hex2str(codeU8[i + j]) + " ";
-    }
-
-    line = line.padEnd(59);
-    line += "| ";
-    line += ByteCode[bytecode];
-
-    line = line.padEnd(79);
-    line += "|";
-
-    i += argSize;
-    result += line + renderJumps(offset) + "\n";
   }
 
-  result += "          +------SCOPE".padEnd(80, "-");
-  result += renderJumps(-1) + "\n";
-
-  const scopeItemsLength = readUint16(scopeU8, 0);
-  let scopeCursor = 2;
-  if (scopeItemsLength === 0) {
-    result += "|".padStart(11) + "EMPTY".padStart(34).padEnd(68) + "|\n";
+  addJump(from: number, to: number): void {
+    this.jumps.push({
+      start: from < to ? from : to,
+      end: from < to ? to : from,
+      dir: from < to ? JumpDir.S2E : JumpDir.E2S,
+      col: -1,
+      done: false
+    });
   }
-
-  for (let i = 0; i < scopeItemsLength; ++i) {
-    let line = "";
-    const isFunction = scopeU8[scopeCursor];
-    const name = data.scope.getNetString16(scopeCursor + 1);
-    scopeCursor += 2 + name.length * 2;
-
-    line += "DEF " + name;
-    if (isFunction) {
-      const fnId = readUint16(scopeU8, scopeCursor);
-      line += " FUNCTION(" + hex2str(fnId) + ")";
-      scopeCursor += 2;
-    }
-    result += ("| ".padStart(12) + line).padEnd(79) + "|\n";
-  }
-
-  result += "          +----CONSTANT POOL".padEnd(80, "-") + "\n";
-
-  for (let i = 0; i < cpU8.length; i += 16) {
-    let line = " ";
-    line += i.toString(16).padStart(8, "0");
-    line += " | ";
-
-    for (let j = 0; j < 16 && i + j < cpU8.length; ++j) {
-      if (j === 8) line += "  ";
-      line += cpU8[i + j].toString(16).padStart(2, "0") + " ";
-    }
-
-    line = line.padEnd(62);
-    line += "|";
-
-    for (let j = 0; j < 16 && i + j < cpU8.length; ++j) {
-      const c = cpU8[i + j];
-      line += c >= 0x20 && c <= 0x7e ? String.fromCharCode(c) : ".";
-    }
-
-    line = line.padEnd(79) + "|";
-
-    result += line + "\n";
-  }
-
-  if (cpU8.length === 0) {
-    result += "|".padStart(11) + "EMPTY".padStart(34).padEnd(68) + "|\n";
-  }
-
-  return result.slice(0, result.length - 1);
 }
 
-function hex2str(num: number, pad = "00"): string {
-  return (pad + num.toString(16)).slice(-pad.length);
+export function dump(data: CompiledData, name = "Main"): string {
+  const dumper = new Dumper(data, name);
+  return dumper.dump();
 }
 
-function readUint16(u8: number[], index: number): number {
-  return (u8[index] << 8) + u8[index + 1];
+function readUint16(n: number[]): number {
+  return (n[0] << 8) + n[1];
+}
+
+function hex2str(num: number, length = 2): string {
+  return num.toString(16).padEnd(length, "0");
 }
