@@ -15,7 +15,7 @@ class WSBufferPolyFill implements WSBuffer {
   private cursor: number;
   size: number;
 
-  constructor(initialSize: number) {
+  constructor(initialSize: number = 64) {
     this.ab = new ArrayBuffer(initialSize);
     this.u8 = new Uint8Array(this.ab);
     this.view = new DataView(this.ab);
@@ -29,7 +29,6 @@ class WSBufferPolyFill implements WSBuffer {
     const newU8 = new Uint8Array(newBuf);
     newU8.set(this.u8);
 
-    this.size = size;
     this.ab = newBuf;
     this.u8 = newU8;
     this.view = new DataView(this.ab);

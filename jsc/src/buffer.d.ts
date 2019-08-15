@@ -36,4 +36,4 @@ declare interface WSBuffer {
   getNetString32(cursor: number): string;
 }
 
-declare const WSBuffer: { new (initialSize: number): WSBuffer };
+declare const WSBuffer: { new (initialSize?: number): WSBuffer };

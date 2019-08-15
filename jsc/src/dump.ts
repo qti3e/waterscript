@@ -302,5 +302,5 @@ function readUint16(n: number[]): number {
 }
 
 function hex2str(num: number, length = 2): string {
-  return num.toString(16).padEnd(length, "0");
+  return num.toString(16).padStart(length, "0");
 }
