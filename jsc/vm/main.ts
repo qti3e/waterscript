@@ -13,7 +13,7 @@ import { toJSValue } from "./data";
 function main() {
   const vm = new VM();
   const ret = vm.compileAndExec(`
-  (2 + 4 - 3) + "X"
+  2 < 5
   `);
 
   console.log(toJSValue(ret));

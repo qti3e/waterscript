@@ -154,3 +154,28 @@ export function toNumber(value: Value): NumberValue {
     value: num!
   };
 }
+
+export function toBoolean(value: Value): BooleanValue {
+  let bool: boolean;
+  switch (value.type) {
+    case DataType.BooleanValue:
+      return value;
+    case DataType.UndefinedValue:
+    case DataType.NullValue:
+      bool = false;
+      break;
+    case DataType.NumberValue:
+    case DataType.StringValue:
+      bool = !!value.value;
+      break;
+    case DataType.SymbolValue:
+    case DataType.ObjectValue:
+      bool = true;
+      break;
+  }
+
+  return {
+    type: DataType.BooleanValue,
+    value: bool!
+  };
+}

@@ -13,7 +13,8 @@ import {
   True,
   toPrimitive,
   toString,
-  toNumber
+  toNumber,
+  toBoolean
 } from "./ecma";
 import { CompiledData } from "../src/compiler";
 import { DataStack } from "./ds";
@@ -138,6 +139,185 @@ export function exec(
         const lNum = toNumber(lhs);
         const rNum = toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value - rNum.value));
+        break;
+      }
+
+      case ByteCode.Mul: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value * rNum.value));
+        break;
+      }
+
+      case ByteCode.Div: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value / rNum.value));
+        break;
+      }
+
+      case ByteCode.Pow: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value ** rNum.value));
+        break;
+      }
+
+      case ByteCode.BLS: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value << rNum.value));
+        break;
+      }
+
+      case ByteCode.BRS: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value >> rNum.value));
+        break;
+      }
+
+      case ByteCode.BURS: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value >>> rNum.value));
+        break;
+      }
+
+      case ByteCode.LT: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value < rNum.value));
+        break;
+      }
+
+      case ByteCode.LTE: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value <= rNum.value));
+        break;
+      }
+
+      case ByteCode.GT: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value > rNum.value));
+        break;
+      }
+
+      case ByteCode.GTE: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value >= rNum.value));
+        break;
+      }
+
+      case ByteCode.BitOr: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value | rNum.value));
+        break;
+      }
+
+      case ByteCode.BitAnd: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value & rNum.value));
+        break;
+      }
+
+      case ByteCode.BitXor: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lNum = toNumber(lhs);
+        const rNum = toNumber(rhs);
+        dataStack.push(jsValue2VM(lNum.value ^ rNum.value));
+        break;
+      }
+
+      case ByteCode.BitNot: {
+        const val = getValue(dataStack.pop());
+        const num = toNumber(val);
+        dataStack.push(jsValue2VM(~num.value));
+        break;
+      }
+
+      case ByteCode.And: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lBool = toBoolean(lhs);
+        const rBool = toBoolean(rhs);
+        dataStack.push(jsValue2VM(lBool.value && rBool.value));
+        break;
+      }
+
+      case ByteCode.OR: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+        const lBool = toBoolean(lhs);
+        const rBool = toBoolean(rhs);
+        dataStack.push(jsValue2VM(lBool.value || rBool.value));
+        break;
+      }
+
+      case ByteCode.Not: {
+        const val = getValue(dataStack.pop());
+        const bool = toBoolean(val);
+        dataStack.push(jsValue2VM(!bool.value));
+        break;
+      }
+
+      case ByteCode.Neg: {
+        const val = getValue(dataStack.pop());
+        const num = toNumber(val);
+        dataStack.push(jsValue2VM(-num.value));
+        break;
+      }
+
+      case ByteCode.Pos: {
+        const val = getValue(dataStack.pop());
+        const num = toNumber(val);
+        dataStack.push(jsValue2VM(+num.value));
+        break;
+      }
+
+      case ByteCode.Pop: {
+        dataStack.pop();
+        break;
+      }
+
+      case ByteCode.Void: {
+        dataStack.pop();
+        dataStack.push(Undefined);
+        break;
+      }
+
+      case ByteCode.Dup: {
+        dataStack.push(dataStack.peek());
         break;
       }
 
