@@ -10,13 +10,10 @@ import { Compiler } from "./compiler";
 import { dump } from "./dump";
 import { global } from "./util";
 
-export function compile(source: string) {
-  const context = new Compiler();
-  context.compile(source);
-
-  const ret = context.getCompiledProgram();
-  return ret;
+if (global.Wsy === undefined) {
+  global.Wsy = Object.create(null);
+  global.Wsy.Compiler = Compiler;
+  global.Wsy.dump = dump;
 }
 
-global.compile = compile;
-global.dump = dump;
+export { Compiler, dump };

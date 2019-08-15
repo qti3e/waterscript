@@ -1,5 +1,4 @@
 import {
-  Callable,
   Value,
   DataType,
   getValue,
@@ -25,6 +24,7 @@ import { DataStack } from "./ds";
 import { Scope } from "./scope";
 import { ByteCode, byteCodeArgSize } from "../src/bytecode";
 import { Obj } from "./obj";
+import { compiler } from "./compiler";
 
 export function call(callable: Value, env: Value, args: Value[] = []): Value {
   if (!isCallable(callable)) {
@@ -42,8 +42,7 @@ export function exec(
   data: CompiledData,
   callScope: Scope,
   env: Value,
-  args: Value[] = [],
-  functions: CompiledData[] = []
+  args: Value[] = []
 ): Value {
   const dataStack = new DataStack();
   const { codeSection, constantPool, scope } = data;
@@ -109,11 +108,7 @@ export function exec(
         const fn: FunctionValue = {
           type: DataType.FunctionValue,
           props: new Obj(),
-          // TODO(qti3e) This will not work on nested functions, maybe:
-          // import { compiler } from "./compiler";
-          // compiler.getFunction(id);
-          // And use the same compiler service in the VM class.
-          compiledData: functions[id]!,
+          compiledData: compiler.requestCompile(id),
           scope: callScope
         };
         dataStack.push(fn);

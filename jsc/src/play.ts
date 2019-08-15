@@ -14,17 +14,20 @@ function main() {
   const source = `
   let i = 0;
   i += 4;
+
+  function x() {
+    function z() {
+
+    }
+  }
 `;
 
-  const context = new Compiler();
-  console.time("Compile");
-  context.compile(source);
-  console.timeEnd("Compile");
-  const ret = context.getCompiledProgram();
+  const compiler = new Compiler();
+  const ret = compiler.compile(source);
 
-  console.log(dump(ret.main));
-  for (let i = 0; i < ret.functions.length; ++i) {
-    console.log(dump(ret.functions[i], i.toString(16)));
+  console.log(dump(ret));
+  for (let i = 0; i <= compiler.lastFunctionId; ++i) {
+    console.log(dump(compiler.requestCompile(i), i.toString(16)));
   }
 }
 

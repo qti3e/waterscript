@@ -1,2 +1,1 @@
-export class CallStackEntity {
-}
+export class CallStackEntity {}

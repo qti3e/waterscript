@@ -15,10 +15,13 @@ function main() {
 
   const ret = vm.compileAndExec(`
   let x = function () {
-    return 5;
+    let z = 0;
+    z += 5;
+    z *= 2;
+    return z;
   }
 
-  x()
+  x() + 3
   `);
 
   console.log(toJSValue(ret));

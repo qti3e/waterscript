@@ -11,11 +11,6 @@ import { parse } from "acorn";
 import { compileFunction, compileMain } from "./gen";
 import { Position } from "estree";
 
-interface VisitQueueEntity {
-  index: number;
-  node: estree.Function;
-}
-
 export interface CompiledData {
   codeSection: WSBuffer;
   constantPool: WSBuffer;
@@ -23,39 +18,33 @@ export interface CompiledData {
   position?: Position;
 }
 
-export interface CompiledProgram {
-  main: CompiledData;
-  functions: CompiledData[];
+interface FunctionEntity {
+  index: number;
+  node: estree.Function;
+  compiledData?: CompiledData;
 }
-
 export class Compiler {
-  private readonly functions: CompiledData[] = [];
-  private readonly functionVisitQueue: VisitQueueEntity[] = [];
-  private main: CompiledData | undefined;
+  private readonly functions: Record<number, FunctionEntity> = {};
+  readonly lastFunctionId = -1;
   inVarDef = false;
 
   requestVisit(node: estree.Function): number {
-    const index = this.functionVisitQueue.length;
+    const index = ++(this as any).lastFunctionId;
     const entity = { index, node };
-    this.functionVisitQueue.push(entity);
+    this.functions[index] = entity;
     return index;
   }
 
-  compile(text: string): void {
+  compile(text: string): CompiledData {
     const node = parse(text, { locations: true });
-    this.main = compileMain(this, node as any);
-
-    for (const fn of this.functionVisitQueue) {
-      this.functions.push(compileFunction(this, fn.node));
-    }
-
-    this.functionVisitQueue.length = 0;
+    return compileMain(this, node as any);
   }
 
-  getCompiledProgram(): CompiledProgram {
-    return {
-      main: this.main!,
-      functions: this.functions
-    };
+  requestCompile(functionId: number): CompiledData {
+    const entity = this.functions[functionId];
+    if (entity.compiledData) return entity.compiledData;
+    const data = compileFunction(this, entity.node);
+    entity.compiledData = data;
+    return data;
   }
 }

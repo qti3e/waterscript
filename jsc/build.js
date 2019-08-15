@@ -4,13 +4,10 @@ require("./dist/bundle");
 const fs = require("fs");
 const source = fs.readFileSync("./dist/bundle.js", "utf-8");
 
-const start = Date.now();
-const ret = compile(source);
-const time = Date.now() - start;
-const lineNo = source.split(/\r?\n/g).length;
+const compiler = new Wsy.Compiler();
+const main = compiler.compile(source);
 
-console.log("Compiled %d lines of code in %dms.", lineNo, time);
-console.log(dump(ret.main));
-for (let i = 0; i < ret.functions.length; ++i) {
-  console.log(dump(ret.functions[i], i.toString(16)));
+console.log(Wsy.dump(main));
+for (let i = 0; i <= compiler.lastFunctionId; ++i) {
+  console.log(Wsy.dump(compiler.requestCompile(i), i.toString(16)));
 }
