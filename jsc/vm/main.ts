@@ -14,10 +14,11 @@ function main() {
   const vm = new VM();
 
   const ret = vm.compileAndExec(`
-  let i = 0;
-  let j
-  j = i = 5;
-  j + 2
+  let x = function () {
+    return 5;
+  }
+
+  x()
   `);
 
   console.log(toJSValue(ret));

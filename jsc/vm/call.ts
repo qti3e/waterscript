@@ -7,7 +7,8 @@ import {
   FunctionValue,
   Reference,
   setToRef,
-  getRef
+  getRef,
+  isCallable
 } from "./data";
 import {
   Undefined,
@@ -25,11 +26,11 @@ import { Scope } from "./scope";
 import { ByteCode, byteCodeArgSize } from "../src/bytecode";
 import { Obj } from "./obj";
 
-export function call(
-  callable: Callable,
-  env: Value,
-  args: Value[] = []
-): Value {
+export function call(callable: Value, env: Value, args: Value[] = []): Value {
+  if (!isCallable(callable)) {
+    throw new TypeError("Value is not a function");
+  }
+
   if (callable.type === DataType.NativeFunctionValue) {
     return callable.fn(env, ...args) || Undefined;
   }
@@ -417,6 +418,17 @@ export function exec(
         const ref = dataStack.peek() as Reference;
         const value = getRef(ref);
         dataStack.push(value);
+        break;
+      }
+
+      case ByteCode.Ret: {
+        return getValue(dataStack.pop());
+      }
+
+      case ByteCode.Call0: {
+        const callable = getValue(dataStack.pop());
+        const ret = call(callable, env, []);
+        dataStack.push(ret);
         break;
       }
 
