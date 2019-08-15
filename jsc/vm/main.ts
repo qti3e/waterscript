@@ -12,8 +12,9 @@ import { toJSValue } from "./data";
 
 function main() {
   const vm = new VM();
+
   const ret = vm.compileAndExec(`
-  2 < 5
+  true ? "Hey" : "Hello"
   `);
 
   console.log(toJSValue(ret));

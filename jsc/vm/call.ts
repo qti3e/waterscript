@@ -321,6 +321,68 @@ export function exec(
         break;
       }
 
+      case ByteCode.Jmp: {
+        const offset = codeSection.getUint16(cursor + 1);
+        nextCursor = offset;
+        break;
+      }
+
+      case ByteCode.JmpTruePop: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.pop()));
+        if (value.value) {
+          nextCursor = offset;
+        }
+        break;
+      }
+
+      case ByteCode.JmpFalsePop: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.pop()));
+        if (!value.value) {
+          nextCursor = offset;
+        }
+        break;
+      }
+
+      case ByteCode.JmpTruePeek: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.peek()));
+        if (value.value) {
+          nextCursor = offset;
+        }
+        break;
+      }
+
+      case ByteCode.JmpFalsePeek: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.peek()));
+        if (!value.value) {
+          nextCursor = offset;
+        }
+        break;
+      }
+
+      case ByteCode.JmpTrueThenPop: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.peek()));
+        if (value.value) {
+          dataStack.pop();
+          nextCursor = offset;
+        }
+        break;
+      }
+
+      case ByteCode.JmpFalseThenPop: {
+        const offset = codeSection.getUint16(cursor + 1);
+        const value = toBoolean(getValue(dataStack.peek()));
+        if (!value.value) {
+          dataStack.pop();
+          nextCursor = offset;
+        }
+        break;
+      }
+
       default:
         console.log("TODO: " + ByteCode[bytecode]);
     }

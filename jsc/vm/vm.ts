@@ -31,6 +31,9 @@ export class VM {
     compiler.compile(source);
     this.program = compiler.getCompiledProgram();
 
-    return this.exec();
+    console.time("exec");
+    const ret = this.exec();
+    console.timeEnd("exec");
+    return ret;
   }
 }
