@@ -8,9 +8,11 @@
 
 import { Value, Reference, DataType } from "./data";
 import { Undefined } from "./ecma";
+import { ObjTable, Obj } from "./obj";
 
 export class Scope {
-  private table: Map<string, Value | null> = new Map();
+  private table: ObjTable = new Map();
+  readonly obj = new Obj(undefined, this.table);
 
   constructor(
     private readonly isBlockScope: boolean,
@@ -47,9 +49,9 @@ export class Scope {
     }
   }
 
-  def(name: string, canAssignToBlock = false): void {
+  def(name: string, canAssignToBlock = false, init: Value = Undefined): void {
     if (!this.isBlockScope || canAssignToBlock) {
-      this.table.set(name, null);
+      this.table.set(name, init);
       return;
     }
 

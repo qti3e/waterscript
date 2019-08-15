@@ -9,11 +9,15 @@
 import { DataType, Value, Reference } from "./data";
 import { Undefined } from "./ecma";
 
+export type ObjTable = Map<string, Value>;
+
 export class Obj {
   readonly type = DataType.ObjectValue;
-  private readonly table: Map<string, Value> = new Map();
 
-  constructor(private proto?: Obj) {}
+  constructor(
+    private proto?: Obj,
+    private readonly table: ObjTable = new Map()
+  ) {}
 
   set(prop: string, value: Value): void {
     this.table.set(prop, value);

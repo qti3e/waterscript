@@ -16,7 +16,10 @@ import {
   UndefinedValue,
   NullValue,
   BooleanValue,
-  isCallable
+  isCallable,
+  StringValue,
+  NumberValue,
+  jsValue2VM
 } from "./data";
 import { assert } from "./util";
 import { Obj } from "./obj";
@@ -74,4 +77,80 @@ function ordinaryToPrimitive(input: Obj, hint: "string" | "number"): Value {
 
 export function type(input: Data): ValueType {
   return getValue(input).type;
+}
+
+export function toString(input: Value): StringValue {
+  let str: string;
+
+  switch (input.type) {
+    case DataType.UndefinedValue:
+      str = "undefined";
+      break;
+    case DataType.NullValue:
+      str = "null";
+      break;
+    case DataType.BooleanValue:
+      str = input.value ? "true" : "false";
+      break;
+    case DataType.StringValue:
+      return input;
+    case DataType.NumberValue:
+      str = input.value + "";
+      break;
+    case DataType.SymbolValue:
+      throw new TypeError(
+        "TypeError: Cannot convert a Symbol value to a string"
+      );
+    case DataType.ObjectValue:
+      const prim = toPrimitive(input, PreferredType.String);
+      return toString(prim);
+    case DataType.NativeFunctionValue:
+      str = "function () { [native code] }";
+      break;
+    case DataType.FunctionValue:
+      throw new Error("Cannot convert function to a string (yet).");
+  }
+
+  return {
+    type: DataType.StringValue,
+    value: str!
+  };
+}
+
+export function numberToString(m: NumberValue): StringValue {
+  return {
+    type: DataType.StringValue,
+    value: m.value + ""
+  };
+}
+
+export function toNumber(value: Value): NumberValue {
+  let num: number;
+  switch (value.type) {
+    case DataType.UndefinedValue:
+      num = NaN;
+      break;
+    case DataType.NullValue:
+      num = +0;
+      break;
+    case DataType.BooleanValue:
+      num = value.value ? 1 : 0;
+      break;
+    case DataType.NumberValue:
+      return value;
+    case DataType.StringValue:
+      num = parseFloat(value.value);
+    case DataType.SymbolValue:
+      throw new TypeError(
+        "TypeError: Cannot convert a Symbol value to a number"
+      );
+    case DataType.ObjectValue:
+      const prim = toPrimitive(value, PreferredType.Number);
+      return toNumber(prim);
+  }
+
+  return {
+    type: DataType.NumberValue,
+    value: num!
+  };
 }

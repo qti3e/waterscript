@@ -9,6 +9,7 @@
 import { CompiledData } from "../src/compiler";
 import { Scope } from "./scope";
 import { Obj } from "./obj";
+import { Undefined, Null } from "./ecma";
 
 /**
  * Data type indicator.
@@ -82,6 +83,7 @@ export interface FunctionValue {
   type: DataType.FunctionValue;
   props: Obj;
   compiledData: CompiledData;
+  scope: Scope;
 }
 
 export interface NativeFunctionValue {
@@ -164,4 +166,49 @@ export function isCallable(input: Value): input is Callable {
     input.type === DataType.FunctionValue ||
     input.type === DataType.NativeFunctionValue
   );
+}
+
+export function toJSValue(value: Value): any {
+  switch (value.type) {
+    case DataType.NullValue:
+      return null;
+    case DataType.UndefinedValue:
+      return undefined;
+    case DataType.BooleanValue:
+    case DataType.NumberValue:
+    case DataType.StringValue:
+      return value.value;
+  }
+  throw new Error("Not implemented.");
+}
+
+export function jsValue2VM(value: any): Value {
+  switch (typeof value) {
+    case "undefined":
+      return Undefined;
+    case "object":
+      if (value === null) return Null;
+    case "function":
+      return {
+        type: DataType.NativeFunctionValue,
+        props: new Obj(),
+        fn: value
+      };
+    case "number":
+      return {
+        type: DataType.NumberValue,
+        value: value
+      };
+    case "boolean":
+      return {
+        type: DataType.BooleanValue,
+        value: value
+      };
+    case "string":
+      return {
+        type: DataType.StringValue,
+        value: value
+      };
+  }
+  throw new Error("Not implemented.");
 }
