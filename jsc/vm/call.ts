@@ -89,6 +89,16 @@ export function exec(
       case ByteCode.LdUndef:
         dataStack.push(Undefined);
         break;
+      case ByteCode.Pop:
+        dataStack.pop();
+        break;
+      case ByteCode.Void:
+        dataStack.pop();
+        dataStack.push(Undefined);
+        break;
+      case ByteCode.Dup:
+        dataStack.push(dataStack.peek());
+        break;
 
       case ByteCode.LdFunction: {
         const id = codeSection.getUint16(cursor + 1);
@@ -302,22 +312,6 @@ export function exec(
         const val = getValue(dataStack.pop());
         const num = toNumber(val);
         dataStack.push(jsValue2VM(+num.value));
-        break;
-      }
-
-      case ByteCode.Pop: {
-        dataStack.pop();
-        break;
-      }
-
-      case ByteCode.Void: {
-        dataStack.pop();
-        dataStack.push(Undefined);
-        break;
-      }
-
-      case ByteCode.Dup: {
-        dataStack.push(dataStack.peek());
         break;
       }
 
