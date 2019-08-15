@@ -6,7 +6,8 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { Value, Reference, DataType, Undefined } from "./data";
+import { Value, Reference, DataType } from "./data";
+import { Undefined } from "./ecma";
 
 export class Scope {
   private table: Map<string, Value | null> = new Map();

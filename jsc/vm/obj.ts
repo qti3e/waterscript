@@ -6,7 +6,8 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { DataType, Value, Reference, Undefined } from "./data";
+import { DataType, Value, Reference } from "./data";
+import { Undefined } from "./ecma";
 
 export class Obj {
   readonly type = DataType.ObjectValue;

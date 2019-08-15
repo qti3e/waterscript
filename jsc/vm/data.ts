@@ -16,12 +16,27 @@ import { Obj } from "./obj";
 export const enum DataType {
   ScopeReference,
   ObjectReference,
-  PrimitiveValue,
-  FunctionValue,
-  NullableValue,
+  UndefinedValue,
+  NullValue,
+  BooleanValue,
+  StringValue,
+  SymbolValue,
+  NumberValue,
   ObjectValue,
+  FunctionValue,
   NativeFunctionValue
 }
+
+export type ValueType =
+  | DataType.UndefinedValue
+  | DataType.NullValue
+  | DataType.BooleanValue
+  | DataType.StringValue
+  | DataType.SymbolValue
+  | DataType.NumberValue
+  | DataType.ObjectValue
+  | DataType.FunctionValue
+  | DataType.NativeFunctionValue;
 
 export interface ScopeReference {
   type: DataType.ScopeReference;
@@ -35,32 +50,61 @@ export interface ObjectReference {
   property: string;
 }
 
-export interface PrimitiveValue {
-  type: DataType.PrimitiveValue;
-  value: number | string | boolean;
-  props: Obj;
+export interface UndefinedValue {
+  type: DataType.UndefinedValue;
 }
 
-export interface NullableValue {
-  type: DataType.NullableValue;
-  undefined?: boolean;
+export interface NullValue {
+  type: DataType.NullValue;
+}
+
+export interface BooleanValue {
+  type: DataType.BooleanValue;
+  value: boolean;
+}
+
+export interface StringValue {
+  type: DataType.StringValue;
+  value: string;
+}
+
+export interface SymbolValue {
+  type: DataType.SymbolValue;
+  id: number;
+}
+
+export interface NumberValue {
+  type: DataType.NumberValue;
+  value: number;
 }
 
 export interface FunctionValue {
   type: DataType.FunctionValue;
-  compiledData: CompiledData;
   props: Obj;
-  scope: Scope;
+  compiledData: CompiledData;
 }
 
 export interface NativeFunctionValue {
   type: DataType.NativeFunctionValue;
   props: Obj;
-  fn: Function;
+  fn: (env: Value, ...args: Value[]) => Value | void;
 }
 
 export type Reference = ScopeReference | ObjectReference;
-export type Value = PrimitiveValue | NullableValue | FunctionValue | Obj;
+
+export type Value =
+  | UndefinedValue
+  | NullValue
+  | BooleanValue
+  | StringValue
+  | SymbolValue
+  | NumberValue
+  | FunctionValue
+  | NativeFunctionValue
+  | Obj;
+
+export type Callable = FunctionValue | NativeFunctionValue;
+
 export type Data = Reference | Value;
 
 export function setToRef(ref: Reference, value: Value): void {
@@ -74,25 +118,50 @@ export function setToRef(ref: Reference, value: Value): void {
   }
 }
 
-export const Null: NullableValue = {
-  type: DataType.NullableValue
-};
+export function getRef(ref: Reference): Value {
+  switch (ref.type) {
+    case DataType.ScopeReference:
+      return ref.scope.find(ref.name);
+    case DataType.ObjectReference:
+      return ref.object.get(ref.property);
+  }
+}
 
-export const Undefined: NullableValue = {
-  type: DataType.NullableValue,
-  undefined: true
-};
+export function isData(value: any): value is Data {
+  return (
+    value &&
+    typeof value === "object" &&
+    (value.type >= DataType.ScopeReference &&
+      value.type <= DataType.NativeFunctionValue)
+  );
+}
 
-export const True: PrimitiveValue = {
-  type: DataType.PrimitiveValue,
-  value: true,
-  // TODO(qti3e)
-  props: new Obj()
-};
+export function isValue(value: any): value is Value {
+  return (
+    value &&
+    typeof value === "object" &&
+    (value.type >= DataType.UndefinedValue &&
+      value.type <= DataType.NativeFunctionValue)
+  );
+}
 
-export const False: PrimitiveValue = {
-  type: DataType.PrimitiveValue,
-  value: false,
-  // TODO(qti3e)
-  props: new Obj()
-};
+export function isRef(value: any): value is Reference {
+  return (
+    value &&
+    typeof value === "object" &&
+    (value.type === DataType.ScopeReference ||
+      value.type === DataType.ObjectReference)
+  );
+}
+
+export function getValue(value: Data): Value {
+  if (isValue(value)) return value;
+  return getRef(value);
+}
+
+export function isCallable(input: Value): input is Callable {
+  return (
+    input.type === DataType.FunctionValue ||
+    input.type === DataType.NativeFunctionValue
+  );
+}
