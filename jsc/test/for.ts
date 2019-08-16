@@ -68,6 +68,18 @@ testCodeResult(
 );
 
 testCodeResult(
+  "For Loop With Continue",
+  `
+  let x = 1;
+  for (let i = 0; i < 10; i += 2) {
+    continue;
+    x += i
+  }
+  x
+`
+);
+
+testCodeResult(
   "Nested Labeled For Loop With Continue",
   `
   let x = 1;

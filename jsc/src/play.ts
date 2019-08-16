@@ -12,14 +12,12 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  let i = 0;
-  i += 4;
-
-  function x() {
-    function z() {
-
-    }
+  let x = 1;
+  for (let i = 0; i < 10; i += 2) {
+    continue;
+    x += i
   }
+  x
 `;
 
   const compiler = new Compiler();

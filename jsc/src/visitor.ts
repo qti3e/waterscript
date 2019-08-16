@@ -432,7 +432,6 @@ export function visit(writer: Writer, node: estree.Node): void {
       if (node.init) visit(writer, node.init);
 
       const testPos = writer.getPosition();
-      label.test();
       if (node.test) {
         visit(writer, node.test);
       } else {
@@ -443,6 +442,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       visit(writer, node.body);
 
+      label.test();
       if (node.update) visit(writer, node.update);
       writer.jmpTo(ByteCode.Jmp, testPos);
       jmp.next();
