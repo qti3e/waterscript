@@ -12,11 +12,12 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  let x = 1;
-  for (let i = 0; i < 10; i += 2) {
-    continue;
-    x += i
-  }
+  let x = 1
+  do {
+    x *= 2
+    if (x > 30) continue;
+    x *= 5;
+  } while (x < 50);
   x
 `;
 

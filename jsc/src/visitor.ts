@@ -455,8 +455,8 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "DoWhileStatement": {
       const label = writer.labels.create();
       const bodyPos = writer.getPosition();
-      label.test();
       visit(writer, node.body);
+      label.test();
       visit(writer, node.test);
       writer.jmpTo(ByteCode.JmpTruePop, bodyPos);
       label.end();
