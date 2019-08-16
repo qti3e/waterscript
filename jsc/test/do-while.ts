@@ -33,6 +33,5 @@ testCodeResult(
     x *= 5;
   } while (x < 50);
   x
-  `,
-  -1
+  `
 );

@@ -139,6 +139,7 @@ export function toNumber(value: Value): NumberValue {
       return value;
     case DataType.StringValue:
       num = parseFloat(value.value);
+      break;
     case DataType.SymbolValue:
       throw new TypeError(
         "TypeError: Cannot convert a Symbol value to a number"
