@@ -25,6 +25,7 @@ import { Scope } from "./scope";
 import { ByteCode, byteCodeArgSize } from "../src/bytecode";
 import { Obj } from "./obj";
 import { compiler } from "./compiler";
+import { timer } from "./timer";
 
 export function call(callable: Value, env: Value, args: Value[] = []): Value {
   if (!isCallable(callable)) {
@@ -42,13 +43,14 @@ export function exec(
   data: CompiledData,
   callScope: Scope,
   env: Value,
-  args: Value[] = []
+  args: Value[] = [],
+  dataStack: DataStack = new DataStack()
 ): Value {
-  const dataStack = new DataStack();
   const { codeSection, constantPool, scope } = data;
   let cursor = 0;
 
   while (cursor < codeSection.size) {
+    timer.check();
     const bytecode = codeSection.get(cursor) as ByteCode;
     const argsSize = byteCodeArgSize[bytecode] || 0;
     let nextCursor = cursor + argsSize + 1;
@@ -426,9 +428,6 @@ export function exec(
         dataStack.push(ret);
         break;
       }
-
-      default:
-        console.log("TODO: " + ByteCode[bytecode]);
     }
     cursor = nextCursor;
   }

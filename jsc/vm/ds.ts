@@ -9,7 +9,11 @@
 import { Data } from "./data";
 
 export class DataStack {
-  private stack: Data[] = [];
+  private readonly stack: Data[] = [];
+
+  getSize(): number {
+    return this.stack.length;
+  }
 
   push(value: Data): void {
     this.stack.push(value);
