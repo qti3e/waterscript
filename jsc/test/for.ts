@@ -80,6 +80,19 @@ testCodeResult(
 );
 
 testCodeResult(
+  "For Loop With Continue Update-less",
+  `
+  let x = 1;
+  for (let i = 0; i < 10;) {
+    i += 2;
+    continue;
+    x += i
+  }
+  x
+`
+);
+
+testCodeResult(
   "Nested Labeled For Loop With Continue",
   `
   let x = 1;
@@ -105,4 +118,32 @@ testCodeResult(
   }
   x
 `
+);
+
+testCodeResult(
+  "For Loop without init",
+  `
+  let x = 0;
+  for (; x < 50; x += 1);
+  x
+  `
+);
+
+testCodeResult(
+  "For Loop without test",
+  `
+  let x;
+  for (x = 0; ; x += 1)
+    if (x > 50) break;
+  x
+  `
+);
+
+testCodeResult(
+  "For Loop without update",
+  `
+  let x;
+  for (x = 0; x > 50; ) x += 3;
+  x
+  `
 );
