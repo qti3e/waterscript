@@ -147,7 +147,7 @@ class Dumper {
 
       for (let j = 0; j < 16 && i + j < size; ++j) {
         if (j === 8) line += "  ";
-        line += hex2str(constantPool.get(i + j));
+        line += hex2str(constantPool.get(i + j)) + " ";
       }
 
       line = line.padEnd(62);

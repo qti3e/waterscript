@@ -10,10 +10,11 @@ import { ByteCode, JumpByteCode } from "./bytecode";
 import { Compiler, CompiledData } from "./compiler";
 import { Scope } from "./scope";
 import { Labels } from "./labels";
+import { ConstantPool } from "./constant_pool";
 
 export class Writer {
   readonly codeSection: WSBuffer = new WSBuffer(64);
-  readonly constantPool: WSBuffer = new WSBuffer(128);
+  readonly constantPool: ConstantPool = new ConstantPool();
   readonly scope: Scope = new Scope();
   readonly labels: Labels = new Labels(this);
   varKind: "var" | "let" | "const" = "var";
@@ -25,7 +26,7 @@ export class Writer {
   getData(): CompiledData {
     return {
       codeSection: this.codeSection,
-      constantPool: this.constantPool,
+      constantPool: this.constantPool.buffer,
       scope: this.scope.getBuffer()
     };
   }
@@ -45,8 +46,7 @@ export class Writer {
     this.codeSection.put(code);
 
     if (constantPoolData !== undefined) {
-      const index = this.constantPool.getCursor();
-      this.constantPool.setNetString16(constantPoolData);
+      const index = this.constantPool.setNetString16(constantPoolData);
       this.codeSection.setUint32(index);
     }
   }

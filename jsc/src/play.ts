@@ -13,7 +13,8 @@ import "./buffer.polyfill";
 function main() {
   const source = `
   var x = 4;
-  function x() {}
+  x.name = 5;
+  x.name.y = 0;
 `;
 
   const compiler = new Compiler();
