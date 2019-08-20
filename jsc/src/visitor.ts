@@ -617,15 +617,22 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "SwitchStatement": {
       const label = writer.labels.createSwitch();
-      visit(writer, node.discriminant);
-
       const length = node.cases.length;
       const last = length - 1;
+
+      if (length === 0) {
+        visit(writer, node.discriminant);
+        writer.write(ByteCode.Pop);
+        break;
+      }
+
+      visit(writer, node.discriminant);
+
       let lastJump: Jump | undefined;
+      let i = 0;
 
-      for (let i = 0; i < length; ++i) {
+      for (; i < length; ++i) {
         const item = node.cases[i];
-
         let jmp: Jump | undefined;
 
         if (item.test) {
@@ -633,6 +640,8 @@ export function visit(writer: Writer, node: estree.Node): void {
           visit(writer, item.test);
           writer.write(ByteCode.EQS);
           jmp = writer.jmp(ByteCode.JmpFalsePop);
+        } else {
+          break;
         }
 
         if (lastJump) lastJump.next();
@@ -644,6 +653,44 @@ export function visit(writer: Writer, node: estree.Node): void {
         if (i !== last) lastJump = writer.jmp(ByteCode.Jmp);
 
         if (jmp) jmp.next();
+      }
+
+      if (i === length) {
+        label.end();
+        writer.write(ByteCode.Pop);
+        break;
+      }
+
+      const jumps: Record<number, Jump> = {};
+
+      const defaultIndex = i++;
+
+      // Find a match
+      for (; i < length; ++i) {
+        writer.write(ByteCode.Dup);
+        visit(writer, node.cases[i].test!);
+        writer.write(ByteCode.EQS);
+        jumps[i] = writer.jmp(ByteCode.JmpTruePop);
+      }
+
+      if (lastJump) {
+        const jmp = writer.jmp(ByteCode.Jmp);
+        lastJump.next();
+        jmp.next();
+      }
+
+      const defaultCons = node.cases[defaultIndex].consequent;
+      for (const stmt of defaultCons) {
+        visit(writer, stmt);
+      }
+
+      for (i = defaultIndex + 1; i < length; ++i) {
+        const item = node.cases[i];
+        jumps[i].next();
+
+        for (const stmt of item.consequent) {
+          visit(writer, stmt);
+        }
       }
 
       label.end();
