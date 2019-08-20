@@ -6,25 +6,48 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-export class Scope {
-  readonly buffer = new WSBuffer(64);
-  private num = 0;
+const enum Kind {
+  Variable = 0,
+  Function = 1
+}
 
-  constructor() {
-    // The first two bytes is the number of scope sections.
-    this.buffer.skip(2);
-  }
+type ScopeEntity =
+  | {
+      kind: Kind.Function;
+      id: number;
+    }
+  | {
+      kind: Kind.Variable;
+    };
+
+export class Scope {
+  private readonly map: Map<string, ScopeEntity> = new Map();
 
   addFunction(name: string, id: number): void {
-    this.buffer.setUint16(++this.num, 0);
-    this.buffer.put(1);
-    this.buffer.setNetString16(name);
-    this.buffer.setUint16(id);
+    this.map.set(name, {
+      kind: Kind.Function,
+      id
+    });
   }
 
   addVariable(name: string): void {
-    this.buffer.setUint16(++this.num, 0);
-    this.buffer.put(0);
-    this.buffer.setNetString16(name);
+    if (this.map.has(name)) return;
+    this.map.set(name, {
+      kind: Kind.Variable
+    });
+  }
+
+  getBuffer(): WSBuffer {
+    const buffer = new WSBuffer();
+    // The first two bytes is the number of scope sections.
+    buffer.setUint16(this.map.size);
+    for (const [name, entity] of this.map) {
+      buffer.put(entity.kind);
+      buffer.setNetString16(name);
+      if (entity.kind === Kind.Function) {
+        buffer.setUint16(entity.id);
+      }
+    }
+    return buffer;
   }
 }

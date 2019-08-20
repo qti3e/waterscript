@@ -12,13 +12,8 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  let x = 1
-  do {
-    x *= 2
-    if (x > 30) continue;
-    x *= 5;
-  } while (x < 50);
-  x
+  var x = 4;
+  function x() {}
 `;
 
   const compiler = new Compiler();

@@ -26,7 +26,7 @@ export class Writer {
     return {
       codeSection: this.codeSection,
       constantPool: this.constantPool,
-      scope: this.scope.buffer
+      scope: this.scope.getBuffer()
     };
   }
 
