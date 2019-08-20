@@ -152,19 +152,25 @@ class VMDumper {
     if (this.wait) this.wait();
   }
 
-  forward(): void {
-    if (!this.handler) return;
+  forward(resume = true): boolean {
+    if (!this.handler) return false;
+
+    if (!resume && this.historyCursor + 1 === this.history.length) return false;
 
     this.historyCursor += 1;
     const item =
       this.historyCursor + 1 === this.history.length
         ? this.current
         : this.history[this.historyCursor];
+
     if (!item) {
+      if (!resume) return false;
       this.resume();
     } else {
       this.handler(item);
     }
+
+    return true;
   }
 
   backward(): void {

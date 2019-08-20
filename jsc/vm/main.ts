@@ -15,6 +15,8 @@ const stdin = process.stdin;
 stdin.setRawMode!(true);
 stdin.resume();
 stdin.setEncoding("utf8");
+let digits = "";
+let interval: NodeJS.Timeout | undefined;
 
 stdin.on("data", function(key) {
   // ctrl-c ( end of text )
@@ -22,12 +24,53 @@ stdin.on("data", function(key) {
     process.exit();
   }
 
+  // Escape
+  if (key === "\u001B") {
+    digits = "";
+  }
+
+  if (/\d/.test(key)) {
+    digits += key;
+  }
+
   if (key === "f" || key === "j") {
-    dumper.forward();
+    const num = parseInt(digits || "1");
+    let i = 0;
+    const x = setInterval(
+      () => (i++ === num ? clearInterval(x) : dumper.forward()),
+      10
+    );
   }
 
   if (key === "b" || key === "k") {
-    dumper.backward();
+    const num = parseInt(digits || "1");
+    for (let i = 0; i < num; ++i) dumper.backward();
+  }
+
+  if (key === "c") {
+    while (dumper.forward(false));
+  }
+
+  if (key === "p") {
+    if (interval) {
+      clearInterval(interval);
+      interval = undefined;
+    } else {
+      const time = parseInt(digits || "1500");
+      if (dumper.forward()) {
+        const x = setInterval(() => {
+          if (!dumper.forward()) {
+            clearInterval(x);
+            interval = undefined;
+          }
+        }, time);
+        interval = x;
+      }
+    }
+  }
+
+  if (!/\d/.test(key)) {
+    digits = "";
   }
 });
 
