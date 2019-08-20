@@ -6,7 +6,7 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { DataType, Value, Reference } from "./data";
+import { DataType, Value, Reference, toJSValue } from "./data";
 import { Undefined } from "./ecma";
 
 export type ObjTable = Map<string, Value>;
@@ -40,5 +40,13 @@ export class Obj {
       object: this,
       property: prop
     };
+  }
+
+  toJS(): Record<string, any> {
+    const ret: Record<string, any> = {};
+    for (const [key, value] of this.table) {
+      ret[key] = toJSValue(value);
+    }
+    return ret;
   }
 }

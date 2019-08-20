@@ -606,10 +606,48 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "SequenceExpression": {
-      for (const expression of node.expressions) {
-        visit(writer, expression);
-        writer.write(ByteCode.Pop);
+      const length = node.expressions.length;
+      const last = length - 1;
+      for (let i = 0; i < length; ++i) {
+        visit(writer, node.expressions[i]);
+        if (i !== last) writer.write(ByteCode.Pop);
       }
+      break;
+    }
+
+    case "SwitchStatement": {
+      const label = writer.labels.createSwitch();
+      visit(writer, node.discriminant);
+
+      const length = node.cases.length;
+      const last = length - 1;
+      let lastJump: Jump | undefined;
+
+      for (let i = 0; i < length; ++i) {
+        const item = node.cases[i];
+
+        let jmp: Jump | undefined;
+
+        if (item.test) {
+          writer.write(ByteCode.Dup);
+          visit(writer, item.test);
+          writer.write(ByteCode.EQS);
+          jmp = writer.jmp(ByteCode.JmpFalsePop);
+        }
+
+        if (lastJump) lastJump.next();
+
+        for (const stmt of item.consequent) {
+          visit(writer, stmt);
+        }
+
+        if (i !== last) lastJump = writer.jmp(ByteCode.Jmp);
+
+        if (jmp) jmp.next();
+      }
+
+      label.end();
+      writer.write(ByteCode.Pop);
       break;
     }
 

@@ -7,7 +7,11 @@ import {
   Reference,
   setToRef,
   getRef,
-  isCallable
+  isCallable,
+  BooleanValue,
+  NumberValue,
+  StringValue,
+  SymbolValue
 } from "./data";
 import {
   Undefined,
@@ -103,6 +107,9 @@ export function exec(
         break;
       case ByteCode.Dup:
         dataStack.push(dataStack.peek());
+        break;
+      case ByteCode.LdObj:
+        dataStack.push(new Obj());
         break;
 
       case ByteCode.LdFunction: {
@@ -406,7 +413,7 @@ export function exec(
       case ByteCode.Asgn: {
         const value = getValue(dataStack.pop());
         const ref = dataStack.pop() as Reference;
-        dataStack.push(value);
+        // dataStack.push(value);
         setToRef(ref, value);
         break;
       }
@@ -415,6 +422,28 @@ export function exec(
         const ref = dataStack.peek() as Reference;
         const value = getRef(ref);
         dataStack.push(value);
+        break;
+      }
+
+      case ByteCode.PropRef: {
+        const obj = dataStack.peek();
+        const offset = codeSection.getUint32(cursor + 1);
+        const name = constantPool.getNetString16(offset);
+        if (obj.type !== DataType.ObjectValue)
+          throw new Error("Not implemented.");
+        const ref = obj.getRef(name);
+        dataStack.push(ref);
+        break;
+      }
+
+      case ByteCode.ComputedRef: {
+        const prop = getValue(dataStack.pop());
+        const obj = dataStack.pop();
+        const name = toString(prop).value;
+        if (obj.type !== DataType.ObjectValue)
+          throw new Error("Not implemented.");
+        const ref = obj.getRef(name);
+        dataStack.push(ref);
         break;
       }
 
@@ -427,6 +456,72 @@ export function exec(
         const ret = call(callable, env, []);
         dataStack.push(ret);
         break;
+      }
+
+      case ByteCode.EQS: {
+        const rhs = getValue(dataStack.pop());
+        const lhs = getValue(dataStack.pop());
+
+        if (rhs.type !== lhs.type) {
+          dataStack.push(False);
+          break;
+        }
+
+        if (
+          rhs.type === DataType.NullValue ||
+          rhs.type === DataType.UndefinedValue
+        ) {
+          dataStack.push(True);
+          break;
+        }
+
+        if (rhs.type === DataType.BooleanValue) {
+          dataStack.push(
+            rhs.value === (lhs as BooleanValue).value ? True : False
+          );
+          break;
+        }
+
+        if (rhs.type === DataType.NumberValue) {
+          dataStack.push(
+            rhs.value === (lhs as NumberValue).value ? True : False
+          );
+          break;
+        }
+
+        if (rhs.type === DataType.StringValue) {
+          dataStack.push(
+            rhs.value === (lhs as StringValue).value ? True : False
+          );
+          break;
+        }
+
+        if (rhs.type === DataType.SymbolValue) {
+          dataStack.push(rhs.id === (lhs as SymbolValue).id ? True : False);
+          break;
+        }
+
+        if (
+          rhs.type === DataType.FunctionValue ||
+          rhs.type === DataType.ObjectValue ||
+          rhs.type === DataType.NativeFunctionValue
+        ) {
+          dataStack.push(rhs === lhs ? True : False);
+          break;
+        }
+
+        throw new Error("Not implemented.");
+      }
+
+      default: {
+        if (
+          bytecode === ByteCode.LdScope ||
+          bytecode === ByteCode.BlockIn ||
+          bytecode === ByteCode.BlockOut
+        )
+          break;
+        const str = ByteCode[bytecode];
+        throw new Error(`Not implemented. [${str}]`);
       }
     }
     cursor = nextCursor;

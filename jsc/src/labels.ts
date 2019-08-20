@@ -37,8 +37,8 @@ export class Labels {
     this.currentLabelName = name;
   }
 
-  create(): LabelInfo {
-    const labelInfo: LabelInfo = new LabelInfo(
+  create(): NormalLabelInfo {
+    const labelInfo = new NormalLabelInfo(
       this.currentLabelName,
       this.writer.codeSection
     );
@@ -49,9 +49,30 @@ export class Labels {
 
     return labelInfo;
   }
+
+  createSwitch(): SwitchLabelInfo {
+    const last = this.labelStack[this.labelStack.length - 1];
+    const labelInfo = new SwitchLabelInfo(
+      this.currentLabelName,
+      this.writer.codeSection,
+      last
+    );
+
+    this.currentLabelName = undefined;
+    this.currentLabelInfo = labelInfo;
+    this.labelStack.push(labelInfo);
+
+    return labelInfo;
+  }
 }
 
-class LabelInfo {
+interface LabelInfo {
+  readonly name: string | undefined;
+  jumpToEnd(): void;
+  jumpToTest(): void;
+}
+
+class NormalLabelInfo implements LabelInfo {
   private endPosition?: number;
   private testPosition?: number;
 
@@ -111,5 +132,22 @@ class LabelInfo {
     }
 
     this.pendingTestJumps = undefined;
+  }
+}
+
+class SwitchLabelInfo extends NormalLabelInfo {
+  constructor(
+    public readonly name: string | undefined,
+    codeSection: WSBuffer,
+    private readonly last: LabelInfo | undefined
+  ) {
+    super(name, codeSection);
+  }
+
+  jumpToTest(): void {
+    if (!this.last) {
+      throw new Error("Unresolved label.");
+    }
+    this.last.jumpToTest();
   }
 }

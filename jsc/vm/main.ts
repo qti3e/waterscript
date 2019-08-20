@@ -14,14 +14,9 @@ function main() {
   const vm = new VM();
 
   const ret = vm.compileAndExec(`
-  let x = function () {
-    let z = 0;
-    z += 5;
-    z *= 2;
-    return z;
-  }
-
-  x() + 3
+  let x = { a: 5, b: 4 };
+  x['a' + 'b'] = 8
+  x
   `);
 
   console.log(toJSValue(ret));

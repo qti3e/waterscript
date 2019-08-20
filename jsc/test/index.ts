@@ -1,8 +1,11 @@
 import "../src/buffer.polyfill";
 import "./literals";
 import "./operations";
+import "./object";
 import "./vars";
 import "./if";
 import "./for";
 import "./while";
 import "./do-while";
+import "./call";
+import "./switch";

@@ -2,7 +2,11 @@ import { test, assertEqual } from "liltest";
 import { VM } from "../vm/vm";
 import { toJSValue } from "../vm/data";
 
-export function testCodeResult(name: string, code: string, timeout = 1500): void {
+export function testCodeResult(
+  name: string,
+  code: string,
+  timeout = 1500
+): void {
   const testFunction = function() {
     const vm = new VM({
       timeout

@@ -178,6 +178,8 @@ export function toJSValue(value: Value): any {
     case DataType.NumberValue:
     case DataType.StringValue:
       return value.value;
+    case DataType.ObjectValue:
+      return value.toJS();
   }
   throw new Error("Not implemented.");
 }
