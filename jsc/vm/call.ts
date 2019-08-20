@@ -60,7 +60,7 @@ export async function exec(
 
   while (cursor < codeSection.size) {
     timer.check();
-    await dumper.dump(data, cursor);
+    await dumper.dump(data, cursor, dataStack);
 
     const bytecode = codeSection.get(cursor) as ByteCode;
     const argsSize = byteCodeArgSize[bytecode] || 0;

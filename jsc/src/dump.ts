@@ -22,7 +22,7 @@ interface JumpInfo {
   done: boolean;
 }
 
-class Dumper {
+export class Dumper {
   private jumps: JumpInfo[] = [];
   private jmpMaxCol: number = 0;
 
@@ -53,18 +53,23 @@ class Dumper {
 
     let ret = "";
     ret += this.renderHeader() + "\n";
-
-    this.forEachByteCode((bc, args, pos) => {
-      ret += this.renderByteCodeRow(pos, bc, [bc, ...args]);
-      ret += this.renderJumpHelper(pos) + "\n";
-    });
-
+    ret += this.renderCodeSection().join("\n") + "\n";
     ret += this.renderScopeHeader();
     ret += this.renderJumpHelper(-1) + "\n";
     ret += this.renderScopeContent().join("\n") + "\n";
     ret += this.renderConstantsHeader() + "\n";
     ret += this.renderConstantsContent().join("\n");
 
+    return ret;
+  }
+
+  renderCodeSection(): string[] {
+    const ret: string[] = [];
+    this.forEachByteCode((bc, args, pos) => {
+      let line = this.renderByteCodeRow(pos, bc, [bc, ...args]);
+      line += this.renderJumpHelper(pos);
+      ret.push(line);
+    });
     return ret;
   }
 
@@ -182,7 +187,11 @@ class Dumper {
     );
   }
 
-  renderJumpHelper(offset: number): string {
+  renderJumpHelper(
+    offset: number,
+    activeOffset?: number,
+    fmt?: (s: string) => string
+  ): string {
     if (this.jmpMaxCol === 0) {
       return "";
     }
@@ -229,6 +238,25 @@ class Dumper {
         }
 
         break;
+      }
+    }
+
+    if (activeOffset !== undefined && fmt) {
+      for (const jmp of this.jumps) {
+        if (
+          (jmp.dir === JumpDir.S2E ? jmp.start : jmp.end) !== activeOffset ||
+          offset < jmp.start ||
+          offset > jmp.end
+        )
+          continue;
+
+        ret[jmp.col] = fmt(ret[jmp.col]);
+
+        if (jmp.start === offset || jmp.end === offset) {
+          for (let i = 0; i < jmp.col; ++i) {
+            ret[i] = fmt(ret[i]);
+          }
+        }
       }
     }
 
