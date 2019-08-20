@@ -30,8 +30,13 @@ import { ByteCode, byteCodeArgSize } from "../src/bytecode";
 import { Obj } from "./obj";
 import { compiler } from "./compiler";
 import { timer } from "./timer";
+import { dumper } from "./dump";
 
-export function call(callable: Value, env: Value, args: Value[] = []): Value {
+export async function call(
+  callable: Value,
+  env: Value,
+  args: Value[] = []
+): Promise<Value> {
   if (!isCallable(callable)) {
     throw new TypeError("Value is not a function");
   }
@@ -40,21 +45,23 @@ export function call(callable: Value, env: Value, args: Value[] = []): Value {
     return callable.fn(env, ...args) || Undefined;
   }
 
-  return exec(callable.compiledData, callable.scope, env, args);
+  return await exec(callable.compiledData, callable.scope, env, args);
 }
 
-export function exec(
+export async function exec(
   data: CompiledData,
   callScope: Scope,
   env: Value,
   args: Value[] = [],
   dataStack: DataStack = new DataStack()
-): Value {
+): Promise<Value> {
   const { codeSection, constantPool, scope } = data;
   let cursor = 0;
 
   while (cursor < codeSection.size) {
     timer.check();
+    await dumper.dump(data, cursor);
+
     const bytecode = codeSection.get(cursor) as ByteCode;
     const argsSize = byteCodeArgSize[bytecode] || 0;
     let nextCursor = cursor + argsSize + 1;
@@ -134,19 +141,19 @@ export function exec(
       case ByteCode.Add: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lPrim = toPrimitive(lhs);
-        const rPrim = toPrimitive(rhs);
+        const lPrim = await toPrimitive(lhs);
+        const rPrim = await toPrimitive(rhs);
         if (
           lPrim.type === DataType.StringValue ||
           rPrim.type === DataType.StringValue
         ) {
-          const lStr = toString(lPrim);
-          const rStr = toString(rPrim);
+          const lStr = await toString(lPrim);
+          const rStr = await toString(rPrim);
           dataStack.push(jsValue2VM(lStr.value + rStr.value));
           break;
         }
-        const lNum = toNumber(lPrim);
-        const rNum = toNumber(rPrim);
+        const lNum = await toNumber(lPrim);
+        const rNum = await toNumber(rPrim);
         dataStack.push(jsValue2VM(lNum.value + rNum.value));
         break;
       }
@@ -154,8 +161,8 @@ export function exec(
       case ByteCode.Sub: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value - rNum.value));
         break;
       }
@@ -163,8 +170,8 @@ export function exec(
       case ByteCode.Mul: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value * rNum.value));
         break;
       }
@@ -172,8 +179,8 @@ export function exec(
       case ByteCode.Div: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value / rNum.value));
         break;
       }
@@ -181,8 +188,8 @@ export function exec(
       case ByteCode.Pow: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value ** rNum.value));
         break;
       }
@@ -190,8 +197,8 @@ export function exec(
       case ByteCode.BLS: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value << rNum.value));
         break;
       }
@@ -199,8 +206,8 @@ export function exec(
       case ByteCode.BRS: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value >> rNum.value));
         break;
       }
@@ -208,8 +215,8 @@ export function exec(
       case ByteCode.BURS: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value >>> rNum.value));
         break;
       }
@@ -217,8 +224,8 @@ export function exec(
       case ByteCode.LT: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value < rNum.value));
         break;
       }
@@ -226,8 +233,8 @@ export function exec(
       case ByteCode.LTE: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value <= rNum.value));
         break;
       }
@@ -235,8 +242,8 @@ export function exec(
       case ByteCode.GT: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value > rNum.value));
         break;
       }
@@ -244,8 +251,8 @@ export function exec(
       case ByteCode.GTE: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value >= rNum.value));
         break;
       }
@@ -253,8 +260,8 @@ export function exec(
       case ByteCode.BitOr: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value | rNum.value));
         break;
       }
@@ -262,8 +269,8 @@ export function exec(
       case ByteCode.BitAnd: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value & rNum.value));
         break;
       }
@@ -271,15 +278,15 @@ export function exec(
       case ByteCode.BitXor: {
         const rhs = getValue(dataStack.pop());
         const lhs = getValue(dataStack.pop());
-        const lNum = toNumber(lhs);
-        const rNum = toNumber(rhs);
+        const lNum = await toNumber(lhs);
+        const rNum = await toNumber(rhs);
         dataStack.push(jsValue2VM(lNum.value ^ rNum.value));
         break;
       }
 
       case ByteCode.BitNot: {
         const val = getValue(dataStack.pop());
-        const num = toNumber(val);
+        const num = await toNumber(val);
         dataStack.push(jsValue2VM(~num.value));
         break;
       }
@@ -311,14 +318,14 @@ export function exec(
 
       case ByteCode.Neg: {
         const val = getValue(dataStack.pop());
-        const num = toNumber(val);
+        const num = await toNumber(val);
         dataStack.push(jsValue2VM(-num.value));
         break;
       }
 
       case ByteCode.Pos: {
         const val = getValue(dataStack.pop());
-        const num = toNumber(val);
+        const num = await toNumber(val);
         dataStack.push(jsValue2VM(+num.value));
         break;
       }
@@ -439,7 +446,7 @@ export function exec(
       case ByteCode.ComputedRef: {
         const prop = getValue(dataStack.pop());
         const obj = dataStack.pop();
-        const name = toString(prop).value;
+        const name = (await toString(prop)).value;
         if (obj.type !== DataType.ObjectValue)
           throw new Error("Not implemented.");
         const ref = obj.getRef(name);
@@ -453,7 +460,7 @@ export function exec(
 
       case ByteCode.Call0: {
         const callable = getValue(dataStack.pop());
-        const ret = call(callable, env, []);
+        const ret = await call(callable, env, []);
         dataStack.push(ret);
         break;
       }

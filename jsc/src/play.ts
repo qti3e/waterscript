@@ -12,7 +12,13 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  x[0] = 1;
+  switch (x) {
+    case x: 0
+    case y: 0
+    default: 1
+    case z: 0
+    case t: 0
+  }
   `;
 
   const compiler = new Compiler();

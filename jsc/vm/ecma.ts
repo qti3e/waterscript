@@ -49,25 +49,28 @@ export enum PreferredType {
   Number
 }
 
-export function toPrimitive(
+export async function toPrimitive(
   input: Value,
   preferredType?: PreferredType
-): Value {
+): Promise<Value> {
   assert(isValue(input));
   if (input.type === DataType.ObjectValue) {
     const hint = preferredType === PreferredType.String ? "string" : "number";
-    return ordinaryToPrimitive(input, hint);
+    return await ordinaryToPrimitive(input, hint);
   }
   return input;
 }
 
-function ordinaryToPrimitive(input: Obj, hint: "string" | "number"): Value {
+async function ordinaryToPrimitive(
+  input: Obj,
+  hint: "string" | "number"
+): Promise<Value> {
   const methodNames =
     hint === "string" ? ["toString", "valueOf"] : ["valueOf", "toString"];
   for (const name of methodNames) {
     const method = input.get(name);
     if (isCallable(method)) {
-      const result = call(method, input);
+      const result = await call(method, input);
       if (result.type !== DataType.ObjectValue) return result;
     }
   }
@@ -78,7 +81,7 @@ export function type(input: Data): ValueType {
   return getValue(input).type;
 }
 
-export function toString(input: Value): StringValue {
+export async function toString(input: Value): Promise<StringValue> {
   let str: string;
 
   switch (input.type) {
@@ -101,8 +104,8 @@ export function toString(input: Value): StringValue {
         "TypeError: Cannot convert a Symbol value to a string"
       );
     case DataType.ObjectValue:
-      const prim = toPrimitive(input, PreferredType.String);
-      return toString(prim);
+      const prim = await toPrimitive(input, PreferredType.String);
+      return await toString(prim);
     case DataType.NativeFunctionValue:
       str = "function () { [native code] }";
       break;
@@ -123,7 +126,7 @@ export function numberToString(m: NumberValue): StringValue {
   };
 }
 
-export function toNumber(value: Value): NumberValue {
+export async function toNumber(value: Value): Promise<NumberValue> {
   let num: number;
   switch (value.type) {
     case DataType.UndefinedValue:
@@ -145,8 +148,8 @@ export function toNumber(value: Value): NumberValue {
         "TypeError: Cannot convert a Symbol value to a number"
       );
     case DataType.ObjectValue:
-      const prim = toPrimitive(value, PreferredType.Number);
-      return toNumber(prim);
+      const prim = await toPrimitive(value, PreferredType.Number);
+      return await toNumber(prim);
   }
 
   return {

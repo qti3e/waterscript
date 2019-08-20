@@ -7,13 +7,13 @@ export function testCodeResult(
   code: string,
   timeout = 1500
 ): void {
-  const testFunction = function() {
+  const testFunction = async function() {
     const vm = new VM({
       timeout
     });
 
     const expected = eval(code);
-    const actual = vm.compileAndExec(code);
+    const actual = await vm.compileAndExec(code);
 
     assertEqual(toJSValue(actual), expected);
     // TODO(qti3e) DataStack GC sucks right now :/

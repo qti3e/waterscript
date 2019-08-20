@@ -31,7 +31,7 @@ export class VM {
     this.timeout = options.timeout;
   }
 
-  compileAndExec(source: string): Value {
+  compileAndExec(source: string): Promise<Value> {
     const main = compiler.compile(source);
     timer.start(this.timeout);
     return exec(main, this.scope, this.scope.obj, [], this.dataStack);
