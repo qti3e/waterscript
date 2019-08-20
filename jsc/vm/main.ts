@@ -22,8 +22,12 @@ stdin.on("data", function(key) {
     process.exit();
   }
 
-  if (key === "r") {
-    dumper.resume();
+  if (key === "f" || key === "j") {
+    dumper.forward();
+  }
+
+  if (key === "b" || key === "k") {
+    dumper.backward();
   }
 });
 
@@ -36,11 +40,11 @@ async function main() {
   const vm = new VM();
 
   const ret = await vm.compileAndExec(`
-  let x = 0
-  for (let i = 0; i < 5; i += 1) {
-    x += 1
-  }
-  x
+  let x;
+
+  x = 5;
+
+  x + 3 + 2 * 4
   `);
 
   console.clear();

@@ -11,7 +11,7 @@ import { Undefined } from "./ecma";
 import { ObjTable, Obj } from "./obj";
 
 export class Scope {
-  private table: ObjTable = new Map();
+  readonly table: ObjTable = new Map();
   readonly obj = new Obj(undefined, this.table);
 
   constructor(
