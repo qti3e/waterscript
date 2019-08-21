@@ -27,7 +27,7 @@ class VMDumper {
     this.cp = [
       dumper.renderConstantsHeader(),
       ...dumper.renderConstantsContent()
-    ];
+    ].map(x => " " + x);
     let i = 0;
     dumper.forEachByteCode((bc, args, offset) => {
       let line = dumper.renderByteCodeRow(offset, bc, [bc, ...args]);
@@ -36,6 +36,7 @@ class VMDumper {
       this.line2offset.set(i, offset);
       i += 1;
     });
+    this.currentData = data;
   }
 
   private render(

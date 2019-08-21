@@ -19,7 +19,6 @@ interface JumpInfo {
   end: number;
   dir: JumpDir;
   col: number;
-  done: boolean;
 }
 
 export class Dumper {
@@ -200,11 +199,13 @@ export class Dumper {
 
     for (let i = 0; i <= this.jmpMaxCol; ++i) {
       for (const jmp of this.jumps) {
-        if (jmp.col !== i || jmp.done || (offset > -1 && offset < jmp.start))
+        if (
+          jmp.col !== i ||
+          (offset > -1 && (offset < jmp.start || offset > jmp.end))
+        )
           continue;
 
         ret[i] = "║";
-        if (jmp.end === offset) jmp.done = true;
 
         if (jmp.start === offset || jmp.end === offset || offset < 0) {
           const headChars = jmp.start === offset ? ["═", "<"] : ["<", "═"];
@@ -314,8 +315,7 @@ export class Dumper {
       start: from < to ? from : to,
       end: from < to ? to : from,
       dir: from < to ? JumpDir.S2E : JumpDir.E2S,
-      col: -1,
-      done: false
+      col: -1
     });
   }
 }
