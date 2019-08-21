@@ -83,11 +83,9 @@ async function main() {
   const vm = new VM();
 
   const ret = await vm.compileAndExec(`
-  switch (0) {
-    case 0: !0;
-    default:
-    case 1: !0;
-  }
+  ({
+    '0': 4
+  })
   `);
 
   console.clear();

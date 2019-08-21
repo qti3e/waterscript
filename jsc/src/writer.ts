@@ -7,17 +7,16 @@
  */
 
 import * as estree from "estree";
-import { Node as AcornNode } from "acorn";
 import { ByteCode, JumpByteCode } from "./bytecode";
 import { Compiler, CompiledData } from "./compiler";
 import { Scope } from "./scope";
 import { Labels } from "./labels";
 import { ConstantPool } from "./constant_pool";
 
-type Pos = {
-  start: number,
-  end: number
-}
+export type Pos = {
+  start: number;
+  end: number;
+};
 
 export class Writer {
   readonly codeSection: WSBuffer = new WSBuffer(64);
@@ -55,7 +54,11 @@ export class Writer {
     };
   }
 
-  write(node: estree.Node | Pos, code: ByteCode, constantPoolData?: string): void {
+  write(
+    node: estree.Node | Pos,
+    code: ByteCode,
+    constantPoolData?: string
+  ): void {
     this.codeSection.put(code);
     this.mapSection.setUint16((node as Pos).start);
     this.mapSection.setUint16((node as Pos).end);

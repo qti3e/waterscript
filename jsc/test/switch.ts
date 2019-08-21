@@ -150,7 +150,7 @@ testCodeResult(
 
   let count = 0;
 
-  function incr() {
+  let incr = () => {
     count += 1
   }
 
@@ -196,6 +196,26 @@ testCodeResult(
     ret[i] = e;
   }
 
+  ret
+  `
+);
+
+testCodeResult(
+  "Switch All",
+  `
+  let ret = {}
+  for (let i = -1; i < 10; i += 1) {
+    let t = "";
+    let r = "";
+    switch (i) {
+      case (t += "0", 0): r += "a"; if (i === 4) break; r += "f";
+      case (t += "1", 1): r += "b"; if (i === 5) break; r += "g";
+      default: r += "c"; if (i === 6) break; r += "h";
+      case (t += "2", 1): r += "d"; if (i === 7) break; r += "i";
+      case (t += "3", 2): r += "e"; if (i === 8) break; r += "j";
+    }
+    ret[i] = {t, r}
+  }
   ret
   `
 );

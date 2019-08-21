@@ -420,7 +420,7 @@ export async function exec(
       case ByteCode.Asgn: {
         const value = getValue(dataStack.pop());
         const ref = dataStack.pop() as Reference;
-        // dataStack.push(value);
+        dataStack.push(value);
         setToRef(ref, value);
         break;
       }
@@ -445,7 +445,7 @@ export async function exec(
 
       case ByteCode.ComputedRef: {
         const prop = getValue(dataStack.pop());
-        const obj = dataStack.pop();
+        const obj = dataStack.peek();
         const name = (await toString(prop)).value;
         if (obj.type !== DataType.ObjectValue)
           throw new Error("Not implemented.");

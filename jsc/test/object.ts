@@ -7,7 +7,8 @@ testCodeResult(
   `
   ({
     a: 5,
-    b: 3
+    b: 3,
+    '0': 4
   })
   `
 );

@@ -11,7 +11,11 @@ import { dump } from "./dump";
 import "./buffer.polyfill";
 
 function main() {
-  const source = `1 + 2 * 3`;
+  const source = `
+  let a = {
+    '0': 0
+  }
+  `;
 
   const compiler = new Compiler();
   const ret = compiler.compile(source);

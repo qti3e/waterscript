@@ -72,11 +72,19 @@ class VMDumper {
     }
     const jmpFmt = willJump ? green : red;
 
-    const codeLines = this.lines!.map((data, no) => {
+    let codeLines = this.lines!.map((data, no) => {
       data = (no === line ? arrow : " ") + data;
       const o = this.line2offset.get(no)!;
       return data + this.dumper!.renderJumpHelper(o, offset, jmpFmt);
     });
+
+    if (codeLines.length > 20) {
+      if (line < 10) {
+        codeLines = codeLines.slice(0, 20);
+      } else {
+        codeLines = codeLines.slice(line - 10).slice(0, 20);
+      }
+    }
 
     const scopeLines: string[] = ["- Scope"];
     const scopeLinesLength: number[] = [scopeLines[0].length];

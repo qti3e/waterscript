@@ -6,7 +6,8 @@
  * \___,_\ \__|_|____/ \___|
  */
 
-import { Writer } from "./writer";
+import * as estree from "estree";
+import { Writer, Pos } from "./writer";
 import { ByteCode } from "./bytecode";
 
 export class Labels {
@@ -40,7 +41,8 @@ export class Labels {
   create(): NormalLabelInfo {
     const labelInfo = new NormalLabelInfo(
       this.currentLabelName,
-      this.writer.codeSection
+      this.writer.codeSection,
+      this.writer.mapSection
     );
 
     this.currentLabelName = undefined;
@@ -55,6 +57,7 @@ export class Labels {
     const labelInfo = new SwitchLabelInfo(
       this.currentLabelName,
       this.writer.codeSection,
+      this.writer.mapSection,
       last
     );
 
@@ -68,8 +71,8 @@ export class Labels {
 
 interface LabelInfo {
   readonly name: string | undefined;
-  jumpToEnd(): void;
-  jumpToTest(): void;
+  jumpToEnd(node: estree.Node | Pos): void;
+  jumpToTest(node: estree.Node | Pos): void;
 }
 
 class NormalLabelInfo implements LabelInfo {
@@ -81,11 +84,14 @@ class NormalLabelInfo implements LabelInfo {
 
   constructor(
     public readonly name: string | undefined,
-    private readonly codeSection: WSBuffer
+    private readonly codeSection: WSBuffer,
+    private readonly mapSection: WSBuffer
   ) {}
 
-  jumpToEnd(): void {
+  jumpToEnd(node: estree.Node | Pos): void {
     this.codeSection.put(ByteCode.Jmp);
+    this.mapSection.setUint16((node as Pos).start);
+    this.mapSection.setUint16((node as Pos).end);
 
     if (this.endPosition === undefined) {
       this.pendingEndJumps!.push(this.codeSection.skip(2));
@@ -95,8 +101,10 @@ class NormalLabelInfo implements LabelInfo {
     this.codeSection.setUint16(this.endPosition);
   }
 
-  jumpToTest(): void {
+  jumpToTest(node: estree.Node | Pos): void {
     this.codeSection.put(ByteCode.Jmp);
+    this.mapSection.setUint16((node as Pos).start);
+    this.mapSection.setUint16((node as Pos).end);
 
     if (this.testPosition === undefined) {
       this.pendingTestJumps!.push(this.codeSection.skip(2));
@@ -139,15 +147,16 @@ class SwitchLabelInfo extends NormalLabelInfo {
   constructor(
     public readonly name: string | undefined,
     codeSection: WSBuffer,
+    mapSection: WSBuffer,
     private readonly last: LabelInfo | undefined
   ) {
-    super(name, codeSection);
+    super(name, codeSection, mapSection);
   }
 
-  jumpToTest(): void {
+  jumpToTest(node: estree.Node | Pos): void {
     if (!this.last) {
       throw new Error("Unresolved label.");
     }
-    this.last.jumpToTest();
+    this.last.jumpToTest(node);
   }
 }

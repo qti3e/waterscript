@@ -18,6 +18,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "ExpressionStatement": {
       visit(writer, node.expression);
+      //      writer.write(node, ByteCode.Pop);
       break;
     }
 
@@ -500,7 +501,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       const labelInfo = writer.labels.getLabelInfo(
         node.label ? node.label.name : undefined
       );
-      labelInfo.jumpToEnd();
+      labelInfo.jumpToEnd(node);
       break;
     }
 
@@ -508,7 +509,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       const labelInfo = writer.labels.getLabelInfo(
         node.label ? node.label.name : undefined
       );
-      labelInfo.jumpToTest();
+      labelInfo.jumpToTest(node);
       break;
     }
 
@@ -598,7 +599,8 @@ export function visit(writer: Writer, node: estree.Node): void {
 
         // TODO(qti3e) ComputedRef and PropRef pop the object from the ds and
         // they're not suited to be used here.
-        if (property.computed) {
+
+        if (property.computed || property.key.type !== "Identifier") {
           visit(writer, property.key);
           writer.write(property, ByteCode.ComputedRef);
         } else {
@@ -611,6 +613,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
         visit(writer, property.value);
         writer.write(property, ByteCode.Asgn);
+        writer.write(property, ByteCode.Pop);
       }
       break;
     }
@@ -682,10 +685,14 @@ export function visit(writer: Writer, node: estree.Node): void {
       // Find a match
       for (; i < length; ++i) {
         const item = node.cases[i];
-        writer.write(item, ByteCode.Dup);
+        const pos = {
+          start: (item as any).start,
+          end: (item.test as any).end
+        };
+        writer.write(pos, ByteCode.Dup);
         visit(writer, item.test!);
-        writer.write(item, ByteCode.EQS);
-        jumps[i] = writer.jmp(item, ByteCode.JmpTruePop);
+        writer.write(pos, ByteCode.EQS);
+        jumps[i] = writer.jmp(pos, ByteCode.JmpTruePop);
       }
 
       if (lastJump) {
