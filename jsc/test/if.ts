@@ -14,6 +14,8 @@ testCodeResult(
     x *= 3;
   }
 
+  if (1 > 2) x *= 2;
+
   x
   `
 );

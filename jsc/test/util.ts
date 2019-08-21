@@ -16,8 +16,7 @@ export function testCodeResult(
     const actual = await vm.compileAndExec(code);
 
     assertEqual(toJSValue(actual), expected);
-    // TODO(qti3e) DataStack GC sucks right now :/
-    // assertEqual(vm.dataStack.getSize(), 0);
+    assertEqual(vm.dataStack.getSize(), 0);
   };
 
   Object.defineProperty(testFunction, "name", { value: name });

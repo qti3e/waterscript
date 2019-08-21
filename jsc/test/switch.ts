@@ -73,7 +73,7 @@ testCodeResult(
     x *= 2;
   }
 
-  ({ count, x})
+  ({ count, x })
   `
 );
 

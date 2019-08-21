@@ -119,6 +119,14 @@ export async function exec(
         dataStack.push(new Obj());
         break;
 
+      case ByteCode.Swap: {
+        let a = dataStack.pop();
+        let b = dataStack.pop();
+        dataStack.push(a);
+        dataStack.push(b);
+        break;
+      }
+
       case ByteCode.LdFunction: {
         const id = codeSection.getUint16(cursor + 1);
         const fn: FunctionValue = {

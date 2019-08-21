@@ -12,9 +12,7 @@ import "./buffer.polyfill";
 
 function main() {
   const source = `
-  let a = {
-    '0': 0
-  }
+  a['0'] = 4;
   `;
 
   const compiler = new Compiler();

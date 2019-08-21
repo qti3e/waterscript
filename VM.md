@@ -80,6 +80,7 @@ And there is `#` for `peek()`
 | 0x35 | PostfixUpdateSub          | i--            |
 | 0x36 | PrefixUpdateAdd           | ++i            |
 | 0x37 | PrefixUpdateSub           | --i            |
+| 0x38 | Swap                      | Swap           |
 
 ## Data Stack with Constant Pool
 

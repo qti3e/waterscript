@@ -17,9 +17,11 @@ export function compileMain(
   program: estree.Program
 ): CompiledData {
   const writer = new Writer(compiler);
+  const body = program.body;
+  const last = body.length - 1;
 
-  for (const node of program.body) {
-    visit(writer, node);
+  for (let i = 0; i < body.length; ++i) {
+    visit(writer, body[i], i < last);
   }
 
   return writer.getData();

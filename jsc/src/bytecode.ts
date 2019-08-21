@@ -64,6 +64,7 @@ export enum ByteCode {
   PostfixUpdateSub = 0x35,
   PrefixUpdateAdd = 0x36,
   PrefixUpdateSub = 0x37,
+  Swap = 0x38,
   // Data Stack with Constant Pool
   LdStr = 0x40,
   NamedProp = 0x41,
