@@ -40,8 +40,8 @@ export function compileFunction(
       break;
   }
 
-  writer.write(ByteCode.LdUndef);
-  writer.write(ByteCode.Ret);
+  writer.write(functionNode, ByteCode.LdUndef);
+  writer.write(functionNode, ByteCode.Ret);
 
   const data = writer.getData();
   if (functionNode.loc) data.position = functionNode.loc.start;

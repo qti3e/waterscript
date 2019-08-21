@@ -3,6 +3,7 @@ import { Dumper } from "../src/dump";
 import { DataStack } from "./ds";
 import { DataType, isValue, toJSValue, isRef } from "./data";
 import { Scope } from "./scope";
+import { compiler } from "./compiler";
 
 class VMDumper {
   handler?: (text: string) => Promise<void>;
@@ -11,7 +12,6 @@ class VMDumper {
   private offset2line = new Map<number, number>();
   private line2offset = new Map<number, number>();
   private wait?: () => void;
-  private cp: string[] = [];
   private dumper?: Dumper;
   private history: string[] = [];
   private historyCursor: number = -1;
@@ -24,10 +24,6 @@ class VMDumper {
     this.lines = [];
     this.offset2line.clear();
     this.line2offset.clear();
-    this.cp = [
-      dumper.renderConstantsHeader(),
-      ...dumper.renderConstantsContent()
-    ].map(x => " " + x);
     let i = 0;
     dumper.forEachByteCode((bc, args, offset) => {
       let line = dumper.renderByteCodeRow(offset, bc, [bc, ...args]);
@@ -58,8 +54,6 @@ class VMDumper {
       const o = this.line2offset.get(no)!;
       return data + this.dumper!.renderJumpHelper(o, offset, green);
     });
-
-    codeLines.push(...this.cp);
 
     const scopeLines: string[] = ["- Scope"];
     const scopeLinesLength: number[] = [scopeLines[0].length];
@@ -103,6 +97,11 @@ class VMDumper {
       }
     }
 
+    const [source, sourceLength] = formatSource(this.currentData!, line, {
+      start: "\x1b[32m\x1b[4m",
+      end: "\x1b[0m"
+    });
+
     const left = [
       ...dataStackLines.slice(0, 10),
       ...new Array(10 - Math.min(dataStackLines.length, 10)).fill(""),
@@ -113,13 +112,14 @@ class VMDumper {
       ...new Array(10 - Math.min(dataStackLines.length, 10)).fill(0),
       ...scopeLinesLength
     ];
-    const maxLength = Math.max(codeLines.length, left.length);
+    const maxLength = Math.max(codeLines.length, left.length, source.length);
     const lines: string[] = [];
 
     for (let i = 0; i < maxLength; ++i) {
       const p1 = (left[i] || "") + "".padEnd(25 - (leftLength[i] || 0));
-      const p2 = codeLines[i] || "";
-      lines.push(" " + p1 + " ║ " + p2);
+      const p2 = (source[i] || "") + "".padEnd(40 - (sourceLength[i] || 0));
+      const p3 = codeLines[i] || "";
+      lines.push(" " + p1 + " ║ " + p2 + " ║ " + p3);
     }
 
     return lines.join("\n");
@@ -183,3 +183,115 @@ class VMDumper {
 }
 
 export const dumper = new VMDumper();
+
+type Style = {
+  start: string;
+  end: string;
+};
+
+function formatSource(
+  data: CompiledData,
+  bytecodeNo: number,
+  style: Style
+): [string[], number[]] {
+  const source = compiler.getSource(data);
+  const [start, end] = compiler.getBound(data, bytecodeNo);
+
+  let lines: string[] = [];
+  let linesLength: number[] = [];
+
+  let line = "";
+  let len = 0;
+  let minIndent = Infinity;
+  let spaces = 0;
+  let isBeforeChar = true;
+  let insertedStart = false;
+  let insertedEnd = false;
+  let lineHasStart = false;
+
+  for (let i = 0; i < source.length; ++i) {
+    if (!insertedStart && i >= start) {
+      line += style.start;
+      insertedStart = true;
+      lineHasStart = true;
+    }
+
+    if (!insertedEnd && i >= end) {
+      line += style.end;
+      insertedEnd = true;
+    }
+
+    let insertLine = false;
+    if (source[i] === "\r" && source[i + 1] === "\n") {
+      insertLine = true;
+      ++i;
+    } else if (source[i] === "\n") {
+      insertLine = true;
+    }
+
+    if (insertLine) {
+      if (line.trim() !== "" && len !== 0) {
+        if (spaces < minIndent) minIndent = spaces;
+      } else {
+        line = "";
+      }
+
+      if (lineHasStart && insertedStart && !insertedEnd) {
+        line += style.end;
+      }
+      lines.push(line);
+      linesLength.push(len);
+
+      spaces = 0;
+      isBeforeChar = true;
+      lineHasStart = false;
+      line = "";
+      len = 0;
+      continue;
+    }
+
+    if (isBeforeChar) {
+      switch (source[i]) {
+        case " ":
+          line += " ";
+          spaces += 1;
+          len += 1;
+          continue;
+        case "\t":
+          line += "  ";
+          spaces += 2;
+          len += 2;
+          continue;
+        default:
+          isBeforeChar = false;
+          if (!lineHasStart && insertedStart && !insertedEnd) {
+            line += style.start;
+            lineHasStart = true;
+          }
+      }
+    }
+
+    line += source[i];
+    len += 1;
+  }
+
+  if (minIndent === Infinity) {
+    minIndent = spaces;
+  }
+
+  if (line.trim() !== "") {
+    if (insertedStart && !insertedEnd && lineHasStart) {
+      line += style.end;
+    }
+    lines.push(line);
+    linesLength.push(len);
+  }
+
+  lines = lines.map(line => line.slice(minIndent));
+  linesLength = linesLength.map(length => Math.max(0, length - minIndent));
+
+  let s = 0;
+  while (linesLength[s] === 0) s++;
+
+  return [["- Source", ...lines.slice(s)], [8, ...linesLength.slice(s)]];
+}

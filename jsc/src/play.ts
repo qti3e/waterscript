@@ -11,15 +11,7 @@ import { dump } from "./dump";
 import "./buffer.polyfill";
 
 function main() {
-  const source = `
-  switch (x) {
-    case x: 0
-    case y: 0
-    default: 1
-    case z: 0
-    case t: 0
-  }
-  `;
+  const source = `1 + 2 * 3`;
 
   const compiler = new Compiler();
   const ret = compiler.compile(source);

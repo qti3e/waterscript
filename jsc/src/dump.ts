@@ -201,7 +201,8 @@ export class Dumper {
       for (const jmp of this.jumps) {
         if (
           jmp.col !== i ||
-          (offset > -1 && (offset < jmp.start || offset > jmp.end))
+          (offset > -1 && (offset < jmp.start || offset > jmp.end)) ||
+          (offset === -1 && offset !== jmp.end)
         )
           continue;
 

@@ -6,6 +6,8 @@
  * \___,_\ \__|_|____/ \___|
  */
 
+import * as estree from "estree";
+import { Node as AcornNode } from "acorn";
 import { ByteCode, JumpByteCode } from "./bytecode";
 import { Compiler, CompiledData } from "./compiler";
 import { Scope } from "./scope";
@@ -14,6 +16,7 @@ import { ConstantPool } from "./constant_pool";
 
 export class Writer {
   readonly codeSection: WSBuffer = new WSBuffer(64);
+  readonly mapSection: WSBuffer = new WSBuffer(64);
   readonly constantPool: ConstantPool = new ConstantPool();
   readonly scope: Scope = new Scope();
   readonly labels: Labels = new Labels(this);
@@ -21,18 +24,23 @@ export class Writer {
 
   constructor(readonly compiler: Compiler) {
     this.codeSection.put(ByteCode.LdScope);
+    this.mapSection.setUint16(0);
+    this.mapSection.setUint16(0);
   }
 
   getData(): CompiledData {
     return {
       codeSection: this.codeSection,
+      mapSection: this.mapSection,
       constantPool: this.constantPool.buffer,
       scope: this.scope.getBuffer()
     };
   }
 
-  jmp(type: JumpByteCode): Jump {
+  jmp(node: estree.Node, type: JumpByteCode): Jump {
     this.codeSection.put(type);
+    this.mapSection.setUint16((node as AcornNode).start);
+    this.mapSection.setUint16((node as AcornNode).end);
     const position = this.codeSection.skip(2);
 
     return {
@@ -42,8 +50,10 @@ export class Writer {
     };
   }
 
-  write(code: ByteCode, constantPoolData?: string): void {
+  write(node: estree.Node, code: ByteCode, constantPoolData?: string): void {
     this.codeSection.put(code);
+    this.mapSection.setUint16((node as AcornNode).start);
+    this.mapSection.setUint16((node as AcornNode).end);
 
     if (constantPoolData !== undefined) {
       const index = this.constantPool.setNetString16(constantPoolData);
@@ -55,8 +65,10 @@ export class Writer {
     return this.codeSection.getCursor();
   }
 
-  jmpTo(type: JumpByteCode, pos: number): void {
+  jmpTo(node: estree.Node, type: JumpByteCode, pos: number): void {
     this.codeSection.put(type);
+    this.mapSection.setUint16((node as AcornNode).start);
+    this.mapSection.setUint16((node as AcornNode).end);
     this.codeSection.setInt16(pos);
   }
 }

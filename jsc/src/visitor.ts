@@ -22,7 +22,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "ThisExpression": {
-      writer.write(ByteCode.LdThis);
+      writer.write(node, ByteCode.LdThis);
       break;
     }
 
@@ -32,70 +32,70 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       switch (node.operator) {
         case "==":
-          writer.write(ByteCode.EQ);
+          writer.write(node, ByteCode.EQ);
           break;
         case "!=":
-          writer.write(ByteCode.IEQ);
+          writer.write(node, ByteCode.IEQ);
           break;
         case "===":
-          writer.write(ByteCode.EQS);
+          writer.write(node, ByteCode.EQS);
           break;
         case "!==":
-          writer.write(ByteCode.IEQS);
+          writer.write(node, ByteCode.IEQS);
           break;
         case "<":
-          writer.write(ByteCode.LT);
+          writer.write(node, ByteCode.LT);
           break;
         case "<=":
-          writer.write(ByteCode.LTE);
+          writer.write(node, ByteCode.LTE);
           break;
         case ">":
-          writer.write(ByteCode.GT);
+          writer.write(node, ByteCode.GT);
           break;
         case ">=":
-          writer.write(ByteCode.GTE);
+          writer.write(node, ByteCode.GTE);
           break;
         case "<<":
-          writer.write(ByteCode.BLS);
+          writer.write(node, ByteCode.BLS);
           break;
         case ">>":
-          writer.write(ByteCode.BRS);
+          writer.write(node, ByteCode.BRS);
           break;
         case ">>>":
-          writer.write(ByteCode.BURS);
+          writer.write(node, ByteCode.BURS);
           break;
         case "+":
-          writer.write(ByteCode.Add);
+          writer.write(node, ByteCode.Add);
           break;
         case "-":
-          writer.write(ByteCode.Sub);
+          writer.write(node, ByteCode.Sub);
           break;
         case "*":
-          writer.write(ByteCode.Mul);
+          writer.write(node, ByteCode.Mul);
           break;
         case "/":
-          writer.write(ByteCode.Div);
+          writer.write(node, ByteCode.Div);
           break;
         case "%":
-          writer.write(ByteCode.Mod);
+          writer.write(node, ByteCode.Mod);
           break;
         case "**":
-          writer.write(ByteCode.Pow);
+          writer.write(node, ByteCode.Pow);
           break;
         case "|":
-          writer.write(ByteCode.BitOr);
+          writer.write(node, ByteCode.BitOr);
           break;
         case "^":
-          writer.write(ByteCode.BitXor);
+          writer.write(node, ByteCode.BitXor);
           break;
         case "&":
-          writer.write(ByteCode.BitAnd);
+          writer.write(node, ByteCode.BitAnd);
           break;
         case "instanceof":
-          writer.write(ByteCode.InstanceOf);
+          writer.write(node, ByteCode.InstanceOf);
           break;
         case "in":
-          writer.write(ByteCode.In);
+          writer.write(node, ByteCode.In);
           break;
       }
       break;
@@ -104,9 +104,10 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "LogicalExpression": {
       visit(writer, node.left);
       const jmp = writer.jmp(
+        node,
         node.operator == "||" ? ByteCode.JmpTruePeek : ByteCode.JmpFalsePeek
       );
-      writer.write(ByteCode.Pop);
+      writer.write(node, ByteCode.Pop);
       visit(writer, node.right);
       jmp.next();
       break;
@@ -117,25 +118,25 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       switch (node.operator) {
         case "-":
-          writer.write(ByteCode.Neg);
+          writer.write(node, ByteCode.Neg);
           break;
         case "!":
-          writer.write(ByteCode.Not);
+          writer.write(node, ByteCode.Not);
           break;
         case "+":
-          writer.write(ByteCode.Pos);
+          writer.write(node, ByteCode.Pos);
           break;
         case "~":
-          writer.write(ByteCode.BitNot);
+          writer.write(node, ByteCode.BitNot);
           break;
         case "delete":
-          writer.write(ByteCode.Del);
+          writer.write(node, ByteCode.Del);
           break;
         case "typeof":
-          writer.write(ByteCode.Type);
+          writer.write(node, ByteCode.Type);
           break;
         case "void":
-          writer.write(ByteCode.Void);
+          writer.write(node, ByteCode.Void);
           break;
       }
       break;
@@ -144,30 +145,30 @@ export function visit(writer: Writer, node: estree.Node): void {
     case "Literal": {
       switch (node.value) {
         case true:
-          writer.write(ByteCode.LdTrue);
+          writer.write(node, ByteCode.LdTrue);
           break main;
         case false:
-          writer.write(ByteCode.LdFalse);
+          writer.write(node, ByteCode.LdFalse);
           break main;
         case null:
-          writer.write(ByteCode.LdNull);
+          writer.write(node, ByteCode.LdNull);
           break main;
         case Infinity:
-          writer.write(ByteCode.LdInfinity);
+          writer.write(node, ByteCode.LdInfinity);
           break main;
         case 0:
-          writer.write(ByteCode.LdZero);
+          writer.write(node, ByteCode.LdZero);
           break main;
         case 1:
-          writer.write(ByteCode.LdOne);
+          writer.write(node, ByteCode.LdOne);
           break main;
         case 2:
-          writer.write(ByteCode.LdTwo);
+          writer.write(node, ByteCode.LdTwo);
           break main;
       }
 
       if (typeof node.value === "string") {
-        writer.write(ByteCode.LdStr, node.value);
+        writer.write(node, ByteCode.LdStr, node.value);
         break;
       }
 
@@ -177,20 +178,20 @@ export function visit(writer: Writer, node: estree.Node): void {
 
         if (isInt32) {
           if (number < 0) {
-            writer.write(ByteCode.LdInt32);
+            writer.write(node, ByteCode.LdInt32);
             writer.codeSection.setInt32(number);
           } else {
-            writer.write(ByteCode.LdUint32);
+            writer.write(node, ByteCode.LdUint32);
             writer.codeSection.setUint32(number);
           }
         } else {
           if (number === Math.fround(number)) {
             // 32 bit.
-            writer.write(ByteCode.LdFloat32);
+            writer.write(node, ByteCode.LdFloat32);
             writer.codeSection.setFloat32(number);
           } else {
             // 64 bit.
-            writer.write(ByteCode.LdFloat64);
+            writer.write(node, ByteCode.LdFloat64);
             writer.codeSection.setFloat64(number);
           }
         }
@@ -199,7 +200,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       }
 
       if (node.value instanceof RegExp) {
-        writer.write(ByteCode.RegExp, node.value.source);
+        writer.write(node, ByteCode.RegExp, node.value.source);
         break;
       }
 
@@ -207,7 +208,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "Identifier": {
-      writer.write(ByteCode.Named, node.name);
+      writer.write(node, ByteCode.Named, node.name);
       break;
     }
 
@@ -220,7 +221,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "FunctionExpression": {
       const index = writer.compiler.requestVisit(node);
-      writer.write(ByteCode.LdFunction);
+      writer.write(node, ByteCode.LdFunction);
       writer.codeSection.setUint16(index);
       // TODO(qti3e) Function name.
       break;
@@ -228,7 +229,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "ArrowFunctionExpression": {
       const index = writer.compiler.requestVisit(node);
-      writer.write(ByteCode.LdFunction);
+      writer.write(node, ByteCode.LdFunction);
       writer.codeSection.setUint16(index);
       // TODO(qti3e) Arrow function names in cases like:
       // let add5 = p => p + 5;
@@ -240,9 +241,10 @@ export function visit(writer: Writer, node: estree.Node): void {
       visit(writer, node.object);
       if (node.computed) {
         visit(writer, node.property);
-        writer.write(ByteCode.Prop);
+        writer.write(node, ByteCode.Prop);
       } else {
         writer.write(
+          node.property,
           ByteCode.NamedProp,
           (node.property as estree.Identifier).name
         );
@@ -252,14 +254,15 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "AssignmentExpression": {
       if (node.left.type === "Identifier") {
-        writer.write(ByteCode.NamedRef, node.left.name);
+        writer.write(node.left, ByteCode.NamedRef, node.left.name);
       } else if (node.left.type === "MemberExpression") {
         visit(writer, node.left.object);
         if (node.left.computed) {
           visit(writer, node.left.property);
-          writer.write(ByteCode.ComputedRef);
+          writer.write(node, ByteCode.ComputedRef);
         } else {
           writer.write(
+            node.left,
             ByteCode.PropRef,
             (node.left.property as estree.Identifier).name
           );
@@ -269,65 +272,66 @@ export function visit(writer: Writer, node: estree.Node): void {
       }
 
       if (node.operator !== "=") {
-        writer.write(ByteCode.UnRefDup);
+        writer.write(node, ByteCode.UnRefDup);
         visit(writer, node.right);
 
         switch (node.operator) {
           case "%=":
-            writer.write(ByteCode.Mod);
+            writer.write(node, ByteCode.Mod);
             break;
           case "&=":
-            writer.write(ByteCode.BitAnd);
+            writer.write(node, ByteCode.BitAnd);
             break;
           case "**=":
-            writer.write(ByteCode.Pow);
+            writer.write(node, ByteCode.Pow);
             break;
           case "*=":
-            writer.write(ByteCode.Mul);
+            writer.write(node, ByteCode.Mul);
             break;
           case "+=":
-            writer.write(ByteCode.Add);
+            writer.write(node, ByteCode.Add);
             break;
           case "-=":
-            writer.write(ByteCode.Sub);
+            writer.write(node, ByteCode.Sub);
             break;
           case "/=":
-            writer.write(ByteCode.Div);
+            writer.write(node, ByteCode.Div);
             break;
           case "<<=":
-            writer.write(ByteCode.BLS);
+            writer.write(node, ByteCode.BLS);
             break;
           case ">>=":
-            writer.write(ByteCode.BRS);
+            writer.write(node, ByteCode.BRS);
             break;
           case ">>>=":
-            writer.write(ByteCode.BURS);
+            writer.write(node, ByteCode.BURS);
             break;
           case "^=":
-            writer.write(ByteCode.BitXor);
+            writer.write(node, ByteCode.BitXor);
             break;
           case "|=":
-            writer.write(ByteCode.BitOr);
+            writer.write(node, ByteCode.BitOr);
             break;
         }
       } else {
         visit(writer, node.right);
       }
 
-      writer.write(ByteCode.Asgn);
+      writer.write(node, ByteCode.Asgn);
       break;
     }
 
     case "UpdateExpression": {
       if (node.argument.type === "Identifier") {
-        writer.write(ByteCode.NamedRef, node.argument.name);
+        writer.write(node.argument, ByteCode.NamedRef, node.argument.name);
       } else if (node.argument.type === "MemberExpression") {
         visit(writer, node.argument.object);
         if (node.argument.computed) {
           visit(writer, node.argument.property);
-          writer.write(ByteCode.ComputedRef);
+          writer.write(node, ByteCode.ComputedRef);
         } else {
           writer.write(
+            node.argument,
             ByteCode.PropRef,
             (node.argument.property as estree.Identifier).name
           );
@@ -338,12 +342,14 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       if (node.prefix) {
         writer.write(
+          node,
           node.operator === "++"
             ? ByteCode.PrefixUpdateAdd
             : ByteCode.PrefixUpdateSub
         );
       } else {
         writer.write(
+          node,
           node.operator === "++"
             ? ByteCode.PostfixUpdateAdd
             : ByteCode.PostfixUpdateSub
@@ -365,7 +371,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       if (node.init) {
         visit(writer, node.init);
       } else {
-        writer.write(ByteCode.LdUndef);
+        writer.write(node, ByteCode.LdUndef);
       }
 
       if (node.id.type === "Identifier") {
@@ -374,6 +380,7 @@ export function visit(writer: Writer, node: estree.Node): void {
         }
 
         writer.write(
+          node,
           writer.varKind === "const"
             ? ByteCode.Const
             : writer.varKind === "let"
@@ -395,11 +402,11 @@ export function visit(writer: Writer, node: estree.Node): void {
       let jmp2: Jump;
 
       visit(writer, node.test);
-      const jmp1 = writer.jmp(ByteCode.JmpFalsePop);
+      const jmp1 = writer.jmp(node, ByteCode.JmpFalsePop);
       visit(writer, node.consequent);
 
       if (alternate) {
-        jmp2 = writer.jmp(ByteCode.Jmp);
+        jmp2 = writer.jmp(node.alternate!, ByteCode.Jmp);
       }
 
       jmp1.next();
@@ -417,9 +424,9 @@ export function visit(writer: Writer, node: estree.Node): void {
       const pos = writer.getPosition();
       label.test();
       visit(writer, node.test);
-      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+      const jmp = writer.jmp(node.test, ByteCode.JmpFalsePop);
       visit(writer, node.body);
-      writer.jmpTo(ByteCode.Jmp, pos);
+      writer.jmpTo(node.body, ByteCode.Jmp, pos);
       jmp.next();
       label.end();
       break;
@@ -427,7 +434,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
     case "ForStatement": {
       const label = writer.labels.create();
-      writer.write(ByteCode.BlockIn);
+      writer.write(node, ByteCode.BlockIn);
 
       if (node.init) visit(writer, node.init);
 
@@ -435,19 +442,19 @@ export function visit(writer: Writer, node: estree.Node): void {
       if (node.test) {
         visit(writer, node.test);
       } else {
-        writer.write(ByteCode.LdTrue);
+        writer.write(node, ByteCode.LdTrue);
       }
 
-      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+      const jmp = writer.jmp(node, ByteCode.JmpFalsePop);
 
       visit(writer, node.body);
 
       label.test();
       if (node.update) visit(writer, node.update);
-      writer.jmpTo(ByteCode.Jmp, testPos);
+      writer.jmpTo(node, ByteCode.Jmp, testPos);
       jmp.next();
 
-      writer.write(ByteCode.BlockOut);
+      writer.write(node, ByteCode.BlockOut);
       label.end();
       break;
     }
@@ -458,16 +465,16 @@ export function visit(writer: Writer, node: estree.Node): void {
       visit(writer, node.body);
       label.test();
       visit(writer, node.test);
-      writer.jmpTo(ByteCode.JmpTruePop, bodyPos);
+      writer.jmpTo(node, ByteCode.JmpTruePop, bodyPos);
       label.end();
       break;
     }
 
     case "ConditionalExpression": {
       visit(writer, node.test);
-      const jmp = writer.jmp(ByteCode.JmpFalsePop);
+      const jmp = writer.jmp(node.test, ByteCode.JmpFalsePop);
       visit(writer, node.consequent);
-      const jmp2 = writer.jmp(ByteCode.Jmp);
+      const jmp2 = writer.jmp(node.consequent, ByteCode.Jmp);
       jmp.next();
       visit(writer, node.alternate);
       jmp2.next();
@@ -475,11 +482,11 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "BlockStatement": {
-      writer.write(ByteCode.BlockIn);
+      writer.write(node, ByteCode.BlockIn);
       for (const stmt of node.body) {
         visit(writer, stmt);
       }
-      writer.write(ByteCode.BlockOut);
+      writer.write(node, ByteCode.BlockOut);
       break;
     }
 
@@ -517,6 +524,7 @@ export function visit(writer: Writer, node: estree.Node): void {
           visit(writer, arg);
         }
         writer.write(
+          node,
           node.type === "CallExpression"
             ? argsCount === 3
               ? ByteCode.Call3
@@ -534,18 +542,19 @@ export function visit(writer: Writer, node: estree.Node): void {
             : ByteCode.New0
         );
       } else {
-        writer.write(ByteCode.NewArg);
+        writer.write(node, ByteCode.NewArg);
 
         for (const arg of node.arguments) {
           if (arg.type === "SpreadElement") {
             throw new Error("Spread argument is not implemented yet.");
           } else {
             visit(writer, arg);
-            writer.write(ByteCode.PushArg);
+            writer.write(arg, ByteCode.PushArg);
           }
         }
 
         writer.write(
+          node,
           node.type === "CallExpression" ? ByteCode.Call : ByteCode.New
         );
       }
@@ -557,21 +566,21 @@ export function visit(writer: Writer, node: estree.Node): void {
       if (node.argument) {
         visit(writer, node.argument);
       } else {
-        writer.write(ByteCode.LdUndef);
+        writer.write(node, ByteCode.LdUndef);
       }
-      writer.write(ByteCode.Ret);
+      writer.write(node, ByteCode.Ret);
       break;
     }
 
     case "ArrayExpression": {
-      writer.write(ByteCode.LdArr);
+      writer.write(node, ByteCode.LdArr);
 
       for (const element of node.elements) {
         if (element.type === "SpreadElement") {
           throw new Error("Spread array element is not implemented yet.");
         } else {
           visit(writer, element);
-          writer.write(ByteCode.ArPush);
+          writer.write(element, ByteCode.ArPush);
         }
       }
 
@@ -579,7 +588,7 @@ export function visit(writer: Writer, node: estree.Node): void {
     }
 
     case "ObjectExpression": {
-      writer.write(ByteCode.LdObj);
+      writer.write(node, ByteCode.LdObj);
       for (const property of node.properties) {
         if (property.type === ("SpreadElement" as any))
           throw new Error("Spread obj element is not implemented yet.");
@@ -591,16 +600,17 @@ export function visit(writer: Writer, node: estree.Node): void {
         // they're not suited to be used here.
         if (property.computed) {
           visit(writer, property.key);
-          writer.write(ByteCode.ComputedRef);
+          writer.write(property, ByteCode.ComputedRef);
         } else {
           writer.write(
+            property,
             ByteCode.PropRef,
             (property.key as estree.Identifier).name
           );
         }
 
         visit(writer, property.value);
-        writer.write(ByteCode.Asgn);
+        writer.write(property, ByteCode.Asgn);
       }
       break;
     }
@@ -610,7 +620,7 @@ export function visit(writer: Writer, node: estree.Node): void {
       const last = length - 1;
       for (let i = 0; i < length; ++i) {
         visit(writer, node.expressions[i]);
-        if (i !== last) writer.write(ByteCode.Pop);
+        if (i !== last) writer.write(node.expressions[i], ByteCode.Pop);
       }
       break;
     }
@@ -622,7 +632,7 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       if (length === 0) {
         visit(writer, node.discriminant);
-        writer.write(ByteCode.Pop);
+        writer.write(node.discriminant, ByteCode.Pop);
         break;
       }
 
@@ -636,10 +646,10 @@ export function visit(writer: Writer, node: estree.Node): void {
         let jmp: Jump | undefined;
 
         if (item.test) {
-          writer.write(ByteCode.Dup);
+          writer.write(item, ByteCode.Dup);
           visit(writer, item.test);
-          writer.write(ByteCode.EQS);
-          jmp = writer.jmp(ByteCode.JmpFalsePop);
+          writer.write(item, ByteCode.EQS);
+          jmp = writer.jmp(item, ByteCode.JmpFalsePop);
         } else {
           break;
         }
@@ -650,14 +660,14 @@ export function visit(writer: Writer, node: estree.Node): void {
           visit(writer, stmt);
         }
 
-        if (i !== last) lastJump = writer.jmp(ByteCode.Jmp);
+        if (i !== last) lastJump = writer.jmp(item, ByteCode.Jmp);
 
         if (jmp) jmp.next();
       }
 
       if (i === length) {
         label.end();
-        writer.write(ByteCode.Pop);
+        writer.write(node.discriminant, ByteCode.Pop);
         break;
       }
 
@@ -667,14 +677,15 @@ export function visit(writer: Writer, node: estree.Node): void {
 
       // Find a match
       for (; i < length; ++i) {
-        writer.write(ByteCode.Dup);
-        visit(writer, node.cases[i].test!);
-        writer.write(ByteCode.EQS);
-        jumps[i] = writer.jmp(ByteCode.JmpTruePop);
+        const item = node.cases[i];
+        writer.write(item, ByteCode.Dup);
+        visit(writer, item.test!);
+        writer.write(item, ByteCode.EQS);
+        jumps[i] = writer.jmp(item, ByteCode.JmpTruePop);
       }
 
       if (lastJump) {
-        const jmp = writer.jmp(ByteCode.Jmp);
+        const jmp = writer.jmp(node, ByteCode.Jmp);
         lastJump.next();
         jmp.next();
       }
@@ -694,13 +705,13 @@ export function visit(writer: Writer, node: estree.Node): void {
       }
 
       label.end();
-      writer.write(ByteCode.Pop);
+      writer.write(node, ByteCode.Pop);
       break;
     }
 
     default:
       // TODO(qti3e)
-      writer.write(ByteCode.TODO);
+      writer.write(node, ByteCode.TODO);
       console.log("TODO: " + node.type);
       break;
   }
