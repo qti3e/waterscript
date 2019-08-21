@@ -646,10 +646,14 @@ export function visit(writer: Writer, node: estree.Node): void {
         let jmp: Jump | undefined;
 
         if (item.test) {
-          writer.write(item, ByteCode.Dup);
+          const pos = {
+            start: (item as any).start,
+            end: (item.test as any).end
+          };
+          writer.write(pos, ByteCode.Dup);
           visit(writer, item.test);
-          writer.write(item, ByteCode.EQS);
-          jmp = writer.jmp(item, ByteCode.JmpFalsePop);
+          writer.write(pos, ByteCode.EQS);
+          jmp = writer.jmp(pos, ByteCode.JmpFalsePop);
         } else {
           break;
         }

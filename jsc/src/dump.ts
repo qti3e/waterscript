@@ -75,7 +75,9 @@ export class Dumper {
   renderByteCodeRow(
     offset: number,
     bytecode: ByteCode,
-    bytes: number[]
+    bytes: number[],
+    width = 80,
+    strWidth = 30
   ): string {
     let line = " ";
     line += hex2str(offset, 8);
@@ -85,11 +87,11 @@ export class Dumper {
       line += hex2str(bytes[j]) + " ";
     }
 
-    line = line.padEnd(59);
+    line = line.padEnd(width - strWidth - 1);
     line += "| ";
     line += ByteCode[bytecode];
 
-    line = line.padEnd(79);
+    line = line.padEnd(width - 1);
     line += "|";
 
     return line;

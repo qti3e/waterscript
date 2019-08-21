@@ -1,9 +1,11 @@
 import { CompiledData } from "../src/compiler";
 import { Dumper } from "../src/dump";
 import { DataStack } from "./ds";
-import { DataType, isValue, toJSValue, isRef } from "./data";
+import { DataType, isValue, toJSValue, isRef, getValue } from "./data";
 import { Scope } from "./scope";
 import { compiler } from "./compiler";
+import { toBoolean } from "./ecma";
+import { ByteCode, isJumpByteCode } from "../src/bytecode";
 
 class VMDumper {
   handler?: (text: string) => Promise<void>;
@@ -11,6 +13,7 @@ class VMDumper {
   private lines?: string[];
   private offset2line = new Map<number, number>();
   private line2offset = new Map<number, number>();
+  private line2bytecode = new Map<number, ByteCode>();
   private wait?: () => void;
   private dumper?: Dumper;
   private history: string[] = [];
@@ -24,12 +27,14 @@ class VMDumper {
     this.lines = [];
     this.offset2line.clear();
     this.line2offset.clear();
+    this.line2bytecode.clear();
     let i = 0;
     dumper.forEachByteCode((bc, args, offset) => {
-      let line = dumper.renderByteCodeRow(offset, bc, [bc, ...args]);
+      let line = dumper.renderByteCodeRow(offset, bc, [bc, ...args], 50, 20);
       this.lines!.push(line);
       this.offset2line.set(offset, i);
       this.line2offset.set(i, offset);
+      this.line2bytecode.set(i, bc);
       i += 1;
     });
     this.currentData = data;
@@ -48,11 +53,29 @@ class VMDumper {
     const red = (x: string | number) => `\u001b[31m${x}\u001b[39m`;
 
     const arrow = (old ? red : green)("⮕");
+    const bc = this.line2bytecode.get(line)!;
+    let willJump = bc === ByteCode.Jmp;
+    if (!willJump && isJumpByteCode(bc)) {
+      const value = getValue(ds.peek());
+      const boolean = toBoolean(value).value;
+      if (boolean) {
+        willJump =
+          bc === ByteCode.JmpTruePeek ||
+          bc === ByteCode.JmpTruePop ||
+          bc === ByteCode.JmpTrueThenPop;
+      } else {
+        willJump =
+          bc === ByteCode.JmpFalsePeek ||
+          bc === ByteCode.JmpFalsePop ||
+          bc === ByteCode.JmpFalseThenPop;
+      }
+    }
+    const jmpFmt = willJump ? green : red;
 
     const codeLines = this.lines!.map((data, no) => {
       data = (no === line ? arrow : " ") + data;
       const o = this.line2offset.get(no)!;
-      return data + this.dumper!.renderJumpHelper(o, offset, green);
+      return data + this.dumper!.renderJumpHelper(o, offset, jmpFmt);
     });
 
     const scopeLines: string[] = ["- Scope"];

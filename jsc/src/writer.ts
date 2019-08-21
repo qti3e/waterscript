@@ -14,6 +14,11 @@ import { Scope } from "./scope";
 import { Labels } from "./labels";
 import { ConstantPool } from "./constant_pool";
 
+type Pos = {
+  start: number,
+  end: number
+}
+
 export class Writer {
   readonly codeSection: WSBuffer = new WSBuffer(64);
   readonly mapSection: WSBuffer = new WSBuffer(64);
@@ -37,10 +42,10 @@ export class Writer {
     };
   }
 
-  jmp(node: estree.Node, type: JumpByteCode): Jump {
+  jmp(node: estree.Node | Pos, type: JumpByteCode): Jump {
     this.codeSection.put(type);
-    this.mapSection.setUint16((node as AcornNode).start);
-    this.mapSection.setUint16((node as AcornNode).end);
+    this.mapSection.setUint16((node as Pos).start);
+    this.mapSection.setUint16((node as Pos).end);
     const position = this.codeSection.skip(2);
 
     return {
@@ -50,10 +55,10 @@ export class Writer {
     };
   }
 
-  write(node: estree.Node, code: ByteCode, constantPoolData?: string): void {
+  write(node: estree.Node | Pos, code: ByteCode, constantPoolData?: string): void {
     this.codeSection.put(code);
-    this.mapSection.setUint16((node as AcornNode).start);
-    this.mapSection.setUint16((node as AcornNode).end);
+    this.mapSection.setUint16((node as Pos).start);
+    this.mapSection.setUint16((node as Pos).end);
 
     if (constantPoolData !== undefined) {
       const index = this.constantPool.setNetString16(constantPoolData);
@@ -65,10 +70,10 @@ export class Writer {
     return this.codeSection.getCursor();
   }
 
-  jmpTo(node: estree.Node, type: JumpByteCode, pos: number): void {
+  jmpTo(node: estree.Node | Pos, type: JumpByteCode, pos: number): void {
     this.codeSection.put(type);
-    this.mapSection.setUint16((node as AcornNode).start);
-    this.mapSection.setUint16((node as AcornNode).end);
+    this.mapSection.setUint16((node as Pos).start);
+    this.mapSection.setUint16((node as Pos).end);
     this.codeSection.setInt16(pos);
   }
 }
