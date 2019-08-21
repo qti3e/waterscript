@@ -35,7 +35,7 @@ export class Compiler {
   private readonly sources: WeakMap<CompiledData, JSSource> = new WeakMap();
   private currentSource: JSSource = { text: "" };
 
-  readonly lastFunctionId = -1;
+  readonly lastFunctionId = 0;
   inVarDef = false;
 
   requestVisit(node: estree.Function): number {

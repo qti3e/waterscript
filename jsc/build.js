@@ -8,6 +8,6 @@ const compiler = new Wsy.Compiler();
 const main = compiler.compile(source);
 
 console.log(Wsy.dump(main));
-for (let i = 0; i <= compiler.lastFunctionId; ++i) {
+for (let i = 1; i <= compiler.lastFunctionId; ++i) {
   console.log(Wsy.dump(compiler.requestCompile(i), i.toString(16)));
 }

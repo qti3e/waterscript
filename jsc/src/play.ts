@@ -19,7 +19,7 @@ function main() {
   const ret = compiler.compile(source);
 
   console.log(dump(ret));
-  for (let i = 0; i <= compiler.lastFunctionId; ++i) {
+  for (let i = 1; i <= compiler.lastFunctionId; ++i) {
     console.log(dump(compiler.requestCompile(i), i.toString(16)));
   }
 }
