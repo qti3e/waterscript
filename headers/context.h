@@ -240,14 +240,14 @@ void context_destroy(ws_context *ctx);
 void context_retain(ws_context *ctx);
 
 /**
- * Execute the compiled data on the context.
- */
-ws_val *context_exec(ws_function_compiled_data *data);
-
-/**
  * Decrement ref_count.
  */
 void context_release(ws_context *ctx);
+
+/**
+ * Execute the compiled data on the context.
+ */
+ws_val *context_exec(ws_function_compiled_data *data);
 
 /**
  * Check if base is deeply parent of ctx.
@@ -321,29 +321,29 @@ void ds_entity_release(ws_ds_entity *entity);
 /**
  * Push the value to the data stack of the given context.
  */
-void context_ds_push(ws_context *context, ws_val *value);
+void context_ds_push(ws_context *ctx, ws_val *value);
 
 /**
  * Returns the data stack head of the context.
  * If no data is availabe ends the process with a non-zero exit code.
  */
-ws_val *context_ds_peek(ws_context *context);
+ws_val *context_ds_peek(ws_context *ctx);
 
 /**
  * Pop the last value from the data stack on the given context and return
  * the value. - If no such data is available dies immediately.
  */
-ws_val *context_ds_pop(ws_context *context);
+ws_val *context_ds_pop(ws_context *ctx);
 
 /**
  * Initialize a new table on the allocated memory.
  */
-void table_init(ws_context *context, void *mem);
+void table_init(ws_context *ctx, void *mem);
 
 /**
  * Destroy a table on the given context.
  */
-void table_destroy(ws_context *context, ws_table *table);
+void table_destroy(ws_context *ctx, ws_table *table);
 
 /**
  * Destroy a table on all of the contexts in which it is defined on.
