@@ -186,41 +186,6 @@ struct _val
 };
 
 /**
- * Undefiend value to be used in the VM.
- */
-const ws_val WS_UNDEFINED = {.type = WVAL_TYPE_UNDEFINED, .ref_count = 1};
-
-/**
- * Null value to be used in the VM.
- */
-const ws_val WS_NULL = {.type = WVAL_TYPE_NULL, .ref_count = 1};
-
-/**
- * True to be used in the VM.
- */
-const ws_val WS_TRUE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 1, .ref_count = 1};
-
-/**
- * False to be used in the VM.
- */
-const ws_val WS_FALSE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 0, .ref_count = 1};
-
-/**
- * 0 to be used in the VM.
- */
-const ws_val WS_ZERO = {.type = WVAL_TYPE_NUMBER, .data.number = 0.0, .ref_count = 1};
-
-/**
- * 1 to be used in the VM.
- */
-const ws_val WS_ONE = {.type = WVAL_TYPE_NUMBER, .data.number = 1.0, .ref_count = 1};
-
-/**
- * 2 to be used in the VM.
- */
-const ws_val WS_TWO = {.type = WVAL_TYPE_NUMBER, .data.number = 2.0, .ref_count = 1};
-
-/**
  * Retain a wval - increment ref_count.
  */
 void wval_retain(ws_val *value);

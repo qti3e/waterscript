@@ -57,6 +57,9 @@ struct _table_ctx *ctx_tables_find(ws_context *ctx, ws_table *table)
   unsigned int i, h;
   i = 0;
 
+  if (ctx->tables.capacity == 0)
+    return NULL;
+
   do
   {
     h = (table->id + i++) % ctx->tables.capacity;
@@ -114,11 +117,13 @@ struct _table_slot *tbl_get(struct _table_ctx *table, ws_val *key)
   struct _table_slot *slot;
   unsigned int hash;
 
-  hash = ws_hash(key);
+  hash = ws_hash(key) % table->capacity;
   slot = table->buckets[hash];
   for (; slot != NULL; slot = slot->next)
+  {
     if (slot->key == key || wval_strict_equal(slot->key, key))
       return slot;
+  }
   return NULL;
 }
 
@@ -142,17 +147,15 @@ void tbl_set(struct _table_ctx *table, ws_val *key, void *data)
   slot->key = key;
   slot->value = data;
   slot->is_delete = 0;
-  hash = ws_hash(slot->key);
+  hash = ws_hash(slot->key) % table->capacity;
   slot->next = table->buckets[hash];
-  table->buckets[hash] = slot->next;
+  table->buckets[hash] = slot;
   ++table->size;
   wval_retain(key);
 }
 
 void tbl_del(struct _table_ctx *table, ws_val *key)
 {
-  tbl_grow(table);
-
   struct _table_slot *slot;
   unsigned int hash;
 
@@ -168,14 +171,16 @@ void tbl_del(struct _table_ctx *table, ws_val *key)
   }
   else
   {
+    tbl_grow(table);
     slot = (struct _table_slot *)ws_alloc(sizeof(*slot));
     slot->key = key;
     slot->is_delete = 1;
     slot->value = NULL;
-    hash = ws_hash(slot->key);
+    hash = ws_hash(slot->key) % table->capacity;
     slot->next = table->buckets[hash];
-    table->buckets[hash] = slot->next;
+    table->buckets[hash] = slot;
     ++table->size;
+    wval_retain(key);
   }
 }
 
@@ -303,7 +308,7 @@ void *table_get(ws_context *ctx, ws_table *t, ws_val *key)
 
   for (; current_ctx != NULL; current_ctx = current_ctx->parent)
   {
-    table = ctx_tables_find(ctx, t);
+    table = ctx_tables_find(current_ctx, t);
     if (table == NULL)
       continue;
     slot = tbl_get(table, key);
