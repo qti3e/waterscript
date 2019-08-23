@@ -1,19 +1,21 @@
+#include <stdio.h>
 #include "wval.h"
 #include "alloc.h"
 #include "common.h"
 
-const ws_val WS_UNDEFINED = {.type = WVAL_TYPE_UNDEFINED, .ref_count = 2727};
-const ws_val WS_NULL = {.type = WVAL_TYPE_NULL, .ref_count = 2727};
-const ws_val WS_TRUE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 1, .ref_count = 2727};
-const ws_val WS_FALSE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 0, .ref_count = 2727};
-const ws_val WS_ZERO = {.type = WVAL_TYPE_NUMBER, .data.number = 0.0, .ref_count = 2727};
-const ws_val WS_ONE = {.type = WVAL_TYPE_NUMBER, .data.number = 1.0, .ref_count = 2727};
-const ws_val WS_TWO = {.type = WVAL_TYPE_NUMBER, .data.number = 2.0, .ref_count = 2727};
+ws_val WS_UNDEFINED = {.type = WVAL_TYPE_UNDEFINED, .ref_count = 2727};
+ws_val WS_NULL = {.type = WVAL_TYPE_NULL, .ref_count = 2727};
+ws_val WS_TRUE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 1, .ref_count = 2727};
+ws_val WS_FALSE = {.type = WVAL_TYPE_BOOLEAN, .data.boolean = 0, .ref_count = 2727};
+ws_val WS_ZERO = {.type = WVAL_TYPE_NUMBER, .data.number = 0.0, .ref_count = 2727};
+ws_val WS_ONE = {.type = WVAL_TYPE_NUMBER, .data.number = 1.0, .ref_count = 2727};
+ws_val WS_TWO = {.type = WVAL_TYPE_NUMBER, .data.number = 2.0, .ref_count = 2727};
 
 void wval_retain(ws_val *value)
 {
   if (value == NULL)
     return;
+
   ++value->ref_count;
 }
 

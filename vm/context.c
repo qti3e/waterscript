@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "context.h"
 #include "wval.h"
 #include "common.h"

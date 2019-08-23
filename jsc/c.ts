@@ -85,25 +85,34 @@ const struct _compiled_function_info
   size_t map_offset;
 } compiled_functions[] = {`);
 
-for (let i = 0; i < functions.length; ++i) {
-  const line = [
-    functions[i].size,
-    functions[i].code_offset,
-    functions[i].constant_pool_offset,
-    functions[i].scope_offset,
-    functions[i].map_offset
-  ]
-    .map(x => fmt(x, 4))
-    .join(", ");
-  console.log("  {" + line + "},");
+for (let i = 0; i < functions.length; i += 2) {
+  const l = (info: FunctionInfo): string =>
+    [
+      info.size,
+      info.code_offset,
+      info.constant_pool_offset,
+      info.scope_offset,
+      info.map_offset
+    ]
+      .map(x => fmt(x, 4))
+      .join(", ");
+
+  if (functions[i + 1]) {
+    console.log(
+      "  {" + l(functions[i]) + "}, " + "{" + l(functions[i + 1]) + "},"
+    );
+  } else {
+    console.log("  {" + l(functions[i]) + "}, ");
+  }
 }
 
 console.log(`};\n`);
 console.log(`const uint8_t global_compiled_data[] = {`);
 
-for (let i = 0; i < u8array.length; i += 13) {
+const s = 17;
+for (let i = 0; i < u8array.length; i += s) {
   let line = u8array
-    .slice(i, i + 13)
+    .slice(i, i + s)
     .map(x => fmt(x))
     .join(", ");
   console.log("  " + line + ",");
@@ -134,17 +143,10 @@ ws_function_compiled_data *get_compiled_data(int id)
 
 ws_function *get_function(int id, ws_scope *scope)
 {
-  static ws_function *cache = NULL;
-
-  if (cache != NULL)
-    return cache;
-
   ws_function *function = (ws_function *)ws_alloc(sizeof(*function));
   function->scope = scope;
   function->ref_count = 1;
   function->id = -id;
   function->data = get_compiled_data(id);
-
-  cache = function;
   return function;
 }`);

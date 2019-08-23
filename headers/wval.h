@@ -188,37 +188,37 @@ struct _val
 /**
  * Undefiend value to be used in the VM.
  */
-const ws_val WS_UNDEFINED;
+ws_val WS_UNDEFINED;
 
 /**
  * Null value to be used in the VM.
  */
-const ws_val WS_NULL;
+ws_val WS_NULL;
 
 /**
  * True to be used in the VM.
  */
-const ws_val WS_TRUE;
+ws_val WS_TRUE;
 
 /**
  * False to be used in the VM.
  */
-const ws_val WS_FALSE;
+ws_val WS_FALSE;
 
 /**
  * 0 to be used in the VM.
  */
-const ws_val WS_ZERO;
+ws_val WS_ZERO;
 
 /**
  * 1 to be used in the VM.
  */
-const ws_val WS_ONE;
+ws_val WS_ONE;
 
 /**
  * 2 to be used in the VM.
  */
-const ws_val WS_TWO;
+ws_val WS_TWO;
 
 /**
  * Retain a wval - increment ref_count.

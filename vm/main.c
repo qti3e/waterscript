@@ -6,6 +6,7 @@
 #include "utf8.h"
 #include "compiled.h"
 #include "common.h"
+#include "exec.h"
 
 int main()
 {
@@ -29,12 +30,25 @@ int main()
   ws_utf8 *data = ws_string_to_utf8(context_resolve(ctx, key));
   write(1, &data->data, data->size);
 
-  ws_function *fn = get_function(1, ctx->scope);
+  printf("%f\n", WS_TWO.data.number);
+
+  ws_function *fn = get_function(0, ctx->scope);
   dump_code(fn->data);
 
   double num = 5.3;
   for (size_t i = 0; i < sizeof(num); ++i)
     printf(" %#04x", ((char *)&num)[i]);
 
-  printf("\nEnd\n");
+  printf("\Exec\n");
+
+  ws_val *ret = exec(ctx, fn->data);
+
+  if (ret == NULL)
+  {
+    printf("NULL\n");
+  }
+  else
+  {
+    printf("Ret: %f\n", ret->data.number);
+  }
 }
