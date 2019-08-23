@@ -122,8 +122,12 @@ int UTF16LEToUTF8(unsigned char *out, int *outlen,
 
 ws_utf8 *ws_string_to_utf8(ws_val *string)
 {
+  if (string == NULL || string->type != WVAL_TYPE_STRING)
+    die("ws_string_to_utf8: Only String is a valid parameter.");
+
   int input_size = string->data.string.size;
   int output_size = input_size;
+
   ws_utf8 *utf8 = (ws_utf8 *)malloc(output_size);
   if (utf8 == NULL)
     die("ws_string_to_utf8: Memory allocation failed.");
@@ -132,5 +136,12 @@ ws_utf8 *ws_string_to_utf8(ws_val *string)
                 (unsigned char *)string->data.string.data, &input_size);
 
   utf8->size = output_size;
+
+  output_size += offsetof(ws_utf8, data);
+
+  utf8 = (ws_utf8 *)realloc(utf8, output_size);
+  if (utf8 == NULL)
+    die("ws_string_to_utf8: Memory allocation failed.");
+
   return utf8;
 }

@@ -65,7 +65,7 @@ struct _obj
   /**
    * Object parent.
    */
-  struct _wobj *proto;
+  struct _obj *proto;
 
   /**
    * Maps property keys to property descriptors.
@@ -170,7 +170,7 @@ struct _val
       /**
        * Symbols description - Null or a string.
        */
-      struct _wval *description;
+      ws_val *description;
 
       /**
        * Symbols id.
@@ -184,6 +184,41 @@ struct _val
     ws_obj *object;
   } data;
 };
+
+/**
+ * Undefiend value to be used in the VM.
+ */
+const ws_val WS_UNDEFINED;
+
+/**
+ * Null value to be used in the VM.
+ */
+const ws_val WS_NULL;
+
+/**
+ * True to be used in the VM.
+ */
+const ws_val WS_TRUE;
+
+/**
+ * False to be used in the VM.
+ */
+const ws_val WS_FALSE;
+
+/**
+ * 0 to be used in the VM.
+ */
+const ws_val WS_ZERO;
+
+/**
+ * 1 to be used in the VM.
+ */
+const ws_val WS_ONE;
+
+/**
+ * 2 to be used in the VM.
+ */
+const ws_val WS_TWO;
 
 /**
  * Retain a wval - increment ref_count.
@@ -204,5 +239,20 @@ int wval_strict_equal(ws_val *v1, ws_val *v2);
  * Create a new WaterScript string.
  */
 ws_val *ws_string(char16_t *data, size_t size);
+
+/**
+ * Create a WaterScript symbol.
+ */
+ws_val *ws_symbol(ws_val *description);
+
+/**
+ * Create a new WaterScript number.
+ */
+ws_val *ws_number(double value);
+
+/**
+ * Create a new WaterScript object value in the context.
+ */
+ws_val *ws_object(ws_context *ctx, ws_val *proto);
 
 #endif

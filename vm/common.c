@@ -12,7 +12,7 @@ void die(char *msg)
 unsigned long ws_hash(ws_val *value)
 {
   unsigned long hash = 0;
-  unsigned int n;
+  int n;
   char *data;
 
   switch (value->type)
