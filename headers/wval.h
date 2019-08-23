@@ -255,4 +255,24 @@ ws_val *ws_number(double value);
  */
 ws_val *ws_object(ws_context *ctx, ws_val *proto);
 
+/**
+ * Convert a WaterScript value to a primitive value.
+ */
+ws_val *ws_to_primitive(ws_context *ctx, ws_val *value);
+
+/**
+ * Convert a WaterScript value to a string.
+ */
+ws_val *ws_to_string(ws_context *ctx, ws_val *value);
+
+/**
+ * Convert a WaterScript value to a number.
+ */
+ws_val *ws_to_number(ws_context *ctx, ws_val *value);
+
+/**
+ * Convert a WaterScript value to a boolean.
+ */
+ws_val *ws_to_boolean(ws_context *ctx, ws_val *value);
+
 #endif

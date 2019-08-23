@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "wval.h"
 #include "alloc.h"
 #include "common.h"
@@ -123,4 +124,24 @@ ws_val *ws_object(ws_context *ctx, ws_val *proto)
   value->ref_count = 0;
   value->data.object = object;
   return value;
+}
+
+ws_val *ws_to_boolean(ws_context *ctx, ws_val *value)
+{
+  switch (value->type)
+  {
+  case WVAL_TYPE_BOOLEAN:
+    return value;
+  case WVAL_TYPE_UNDEFINED:
+  case WVAL_TYPE_NULL:
+    return &WS_FALSE;
+  case WVAL_TYPE_SYMBOL:
+  case WVAL_TYPE_OBJECT:
+    return &WS_TRUE;
+  case WVAL_TYPE_STRING:
+    return value->data.string.size == 0 ? &WS_FALSE : &WS_TRUE;
+  case WVAL_TYPE_NUMBER:
+    return (isnan(value->data.number) || value->data.number == 0) ? &WS_FALSE
+                                                                  : &WS_TRUE;
+  }
 }

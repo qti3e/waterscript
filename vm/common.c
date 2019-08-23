@@ -4,6 +4,8 @@
 #include "compiler.h"
 #include "common.h"
 #include "bytecode.h"
+#include "utf8.h"
+#include "alloc.h"
 
 void die(char *msg)
 {
@@ -51,5 +53,94 @@ void dump_code(ws_function_compiled_data *data)
       printf(" %#04x", data->data[i + 1]);
 
     printf("\n");
+  }
+}
+
+ws_val *escape_string(ws_val *value)
+{
+  size_t size, cursor, cursor2;
+  char16_t *ret;
+  char16_t escapes[] = u"\0\b\t\n\v\f\r\"\'\\";
+  char16_t escaped[] = u"0btnvfr\"\'\\";
+  size_t num_escapes = sizeof(escaped) / 2 - 1;
+
+  size = value->data.string.size;
+  for (cursor = 0; cursor < value->data.string.size / 2 - 1; ++cursor)
+  {
+    for (size_t i = 0; i < num_escapes; ++i)
+    {
+      if (escapes[i] == value->data.string.data[cursor])
+      {
+        size += 2;
+        break;
+      }
+    }
+  }
+
+  ret = (char16_t *)ws_alloc(size);
+  for (cursor = 0, cursor2 = 0; cursor < value->data.string.size / 2 - 1; ++cursor, ++cursor2)
+  {
+    ret[cursor2] = value->data.string.data[cursor];
+    for (size_t i = 0; i < num_escapes; ++i)
+    {
+      if (escapes[i] == value->data.string.data[cursor])
+      {
+        ret[cursor2] = *u"\\";
+        ret[cursor2 + 1] = escaped[i];
+        cursor2 += 1;
+        break;
+      }
+    }
+  }
+
+  ret[cursor2] = 0;
+
+  return ws_string(ret, size);
+}
+
+void dump_value(ws_val *value)
+{
+  // TODO(qti3e) Make this better, and use ws_free.
+
+  if (value == NULL)
+  {
+    printf("dump_value: Value cannot be null.\n");
+    return;
+  }
+
+  ws_utf8 *utf8;
+
+  switch (value->type)
+  {
+  case WVAL_TYPE_BOOLEAN:
+    printf(value->data.boolean ? "true\n" : "false\n");
+    return;
+  case WVAL_TYPE_UNDEFINED:
+    printf("undefined\n");
+    return;
+  case WVAL_TYPE_NULL:
+    printf("null\n");
+    return;
+  case WVAL_TYPE_SYMBOL:
+    if (value->data.symbol.description != NULL)
+    {
+      utf8 = ws_string_to_utf8(value->data.symbol.description);
+      printf("Symbol(%d)[%.*s]\n", value->data.symbol.id, utf8->size, utf8->data);
+    }
+    else
+    {
+      printf("Symbol(%d)\n", value->data.symbol.id);
+    }
+    return;
+  case WVAL_TYPE_OBJECT:
+    printf("Object {...}\n");
+    return;
+  case WVAL_TYPE_STRING:
+    utf8 = ws_string_to_utf8(escape_string(value));
+    printf("\"%.*s\"\n", utf8->size, utf8->data);
+    return;
+  case WVAL_TYPE_NUMBER:
+    printf("%f\n", value->data.number);
+    return;
   }
 }

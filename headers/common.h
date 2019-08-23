@@ -16,8 +16,13 @@ void die(char *msg);
 unsigned long ws_hash(ws_val *value);
 
 /**
- * Dump a compiled code to screen.
+ * Dump a compiled code to the stdout.
  */
 void dump_code(ws_function_compiled_data *data);
+
+/**
+ * Dump a WaterScript value to the stdout.
+ */
+void dump_value(ws_val *value);
 
 #endif
