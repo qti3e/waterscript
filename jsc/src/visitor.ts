@@ -755,7 +755,7 @@ export function visit(writer: Writer, node: estree.Node, pop = false): void {
     default:
       // TODO(qti3e)
       writer.write(node, ByteCode.TODO);
-      console.log("TODO: " + node.type);
+      console.error("TODO: " + node.type);
       break;
   }
 }

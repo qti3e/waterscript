@@ -1,7 +1,7 @@
 #ifndef _Q_WS_COMPILER_
 #define _Q_WS_COMPILER_
 
-#include "wval.h";
+#include "wval.h"
 
 typedef struct _function ws_function;
 typedef struct _function_compiled_data ws_function_compiled_data;

@@ -4,6 +4,7 @@
 #include "context.h"
 #include "wval.h"
 #include "utf8.h"
+#include "compiled.h"
 
 int main()
 {
@@ -26,6 +27,9 @@ int main()
 
   ws_utf8 *data = ws_string_to_utf8(context_resolve(ctx, key));
   write(1, &data->data, data->size);
+
+  ws_function *fn = get_function(0, ctx->scope);
+  printf("%zu\n", fn->data->constant_pool_offset);
 
   printf("End\n");
 }
