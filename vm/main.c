@@ -5,6 +5,7 @@
 #include "wval.h"
 #include "utf8.h"
 #include "compiled.h"
+#include "common.h"
 
 int main()
 {
@@ -30,6 +31,8 @@ int main()
 
   ws_function *fn = get_function(0, ctx->scope);
   printf("%zu\n", fn->data->constant_pool_offset);
+
+  dump_code(fn->data);
 
   printf("End\n");
 }

@@ -116,7 +116,7 @@ ws_function_compiled_data *get_compiled_data(int id)
   const uint8_t *data = global_compiled_data + start;
 
   ws_function_compiled_data *compiled_data = (ws_function_compiled_data *)
-      ws_alloc(sizeof(ws_function_compiled_data) + 100);
+      ws_alloc(sizeof(ws_function_compiled_data) + info.size);
 
   compiled_data->constant_pool_offset = info.constant_pool_offset - start;
   compiled_data->scope_offset = info.scope_offset - start;
