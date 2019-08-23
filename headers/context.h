@@ -103,6 +103,23 @@ struct _context_list
 };
 
 /**
+ * A hash table that can be used in a context, the information is stored on the
+ * context.
+ */
+struct _table
+{
+  /**
+   * Table id.
+   */
+  unsigned int id;
+
+  /**
+   * The context in which this table was created on for the first time.
+   */
+  ws_context *ctx;
+};
+
+/**
  * A runtime scope.
  */
 struct _scope
@@ -147,23 +164,6 @@ struct _ds_entity
    * The next ds entity in the stack.
    */
   ws_ds_entity *next;
-};
-
-/**
- * A hash table that can be used in a context, the information is stored on the
- * context.
- */
-struct _table
-{
-  /**
-   * Table id.
-   */
-  unsigned int id;
-
-  /**
-   * The context in which this table was created on for the first time.
-   */
-  ws_context *ctx;
 };
 
 /**
@@ -363,6 +363,6 @@ void table_del(ws_context *ctx, ws_table *table, ws_val *key);
 /**
  * Find a value on the table and returns the pointer to that.
  */
-void *table_get(ws_table *ctx, ws_table *table, ws_val *key);
+void *table_get(ws_context *ctx, ws_table *table, ws_val *key);
 
 #endif

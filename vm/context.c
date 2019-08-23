@@ -1,5 +1,5 @@
 #include "context.h"
-#include "wval.h";
+#include "wval.h"
 #include "common.h"
 #include "alloc.h"
 
@@ -9,7 +9,7 @@ ws_context *context_create()
 {
   static atomic_uint last_context_id = 0;
 
-  ws_context *ctx = ws_alloc(sizeof(*ctx));
+  ws_context *ctx = (ws_context *)ws_alloc(sizeof(*ctx));
   ctx->id = ++last_context_id;
   ctx->ref_count = 1;
 
@@ -80,7 +80,7 @@ void context_fork(ws_context *ctx, unsigned int n)
 
   for (unsigned int i = 0; i < n; ++i)
   {
-    tmp = ws_alloc(sizeof(*tmp));
+    tmp = (ws_context_list *)ws_alloc(sizeof(*tmp));
     tmp->ctx = context_create();
     tmp->ctx->parent = ctx;
     tmp->ctx->ds_head = ctx->ds_head;
@@ -151,7 +151,7 @@ void context_new_scope(ws_context *ctx, int is_block)
 {
   if (ctx->forked)
     die("context: Cannot create a new scope on a forked context.");
-  ws_scope *s = ws_alloc(sizeof(*s));
+  ws_scope *s = (ws_scope *)ws_alloc(sizeof(*s));
   s->parent = ctx->scope;
   s->is_block = is_block;
   s->ref_count = 1;
@@ -195,7 +195,7 @@ ws_val *context_resolve(ws_context *ctx, ws_val *key)
   ws_scope *scope = ctx->scope;
   for (; scope != NULL; scope = scope->parent)
   {
-    ret = table_get(ctx, &scope->table, key);
+    ret = (ws_val *)table_get(ctx, &scope->table, key);
     if (ret != NULL)
       return ret;
   }
@@ -244,7 +244,7 @@ void context_ds_push(ws_context *ctx, ws_val *value)
     die("context: Cannot push a new value to the data stack on forked context.");
 
   ws_ds_entity *e;
-  e = ws_alloc(sizeof(*e));
+  e = (ws_ds_entity *)ws_alloc(sizeof(*e));
   e->value = value;
   e->ref_count = 1;
   e->next = ctx->ds_head;

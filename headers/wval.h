@@ -220,4 +220,19 @@ const ws_val WS_ONE = {.type = WVAL_TYPE_NUMBER, .data.number = 1.0, .ref_count 
  */
 const ws_val WS_TWO = {.type = WVAL_TYPE_NUMBER, .data.number = 2.0, .ref_count = 1};
 
+/**
+ * Retain a wval - increment ref_count.
+ */
+void wval_retain(ws_val *value);
+
+/**
+ * Release a wval - decrement ref_count.
+ */
+void wval_release(ws_val *value);
+
+/**
+ * Check if two WaterScript values are equal.
+ */
+int wval_strict_equal(ws_val *v1, ws_val *v2);
+
 #endif

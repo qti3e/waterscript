@@ -1,5 +1,5 @@
 #include "context.h"
-#include "wval.h";
+#include "wval.h"
 #include "common.h"
 #include "alloc.h"
 
@@ -18,9 +18,8 @@ void ctx_tables_grow(ws_context *ctx)
     ctx->tables.capacity = 4;
 
   tables = ctx->tables.tables;
-  ctx->tables.tables = ws_alloc(
+  ctx->tables.tables = (struct _table_ctx **)ws_alloc(
       sizeof(struct _table_ctx *) * ctx->tables.capacity);
-  assert(ctx->tables.tables != NULL);
 
   for (i = 0; i < ctx->tables.capacity; ++i)
     ctx->tables.tables[i] = NULL;
@@ -35,7 +34,7 @@ void ctx_tables_grow(ws_context *ctx)
 
 void ctx_tables_insert(ws_context *ctx, struct _table_ctx *w)
 {
-  int i, h;
+  unsigned int i, h;
 
   ++ctx->tables.size;
   if (ctx->tables.size > ctx->tables.capacity)
@@ -55,7 +54,7 @@ void ctx_tables_insert(ws_context *ctx, struct _table_ctx *w)
 
 struct _table_ctx *ctx_tables_find(ws_context *ctx, ws_table *table)
 {
-  int i, h;
+  unsigned int i, h;
   i = 0;
 
   do
@@ -63,7 +62,7 @@ struct _table_ctx *ctx_tables_find(ws_context *ctx, ws_table *table)
     h = (table->id + i++) % ctx->tables.capacity;
     if (ctx->tables.tables[h] == NULL)
       return NULL;
-    if (ctx->tables.tables[h]->id == t->id)
+    if (ctx->tables.tables[h]->id == table->id)
       return ctx->tables.tables[h];
   } while (i != ctx->tables.capacity);
 
@@ -89,8 +88,7 @@ void tbl_grow(struct _table_ctx *table)
     table->capacity = 4;
 
   buckets = table->buckets;
-  table->buckets = ws_alloc(sizeof(struct _table_slot *) * table->capacity);
-  assert(table->buckets != NULL);
+  table->buckets = (struct _table_slot **)ws_alloc(sizeof(struct _table_slot *) * table->capacity);
 
   for (i = 0; i < table->capacity; ++i)
     table->buckets[i] = NULL;
@@ -100,7 +98,7 @@ void tbl_grow(struct _table_ctx *table)
     current = buckets[i];
     while (current != NULL)
     {
-      hash = tbl_hash(current->key) % table->capacity;
+      hash = ws_hash(current->key) % table->capacity;
       tmp = current->next;
       current->next = table->buckets[hash];
       table->buckets[hash] = current;
@@ -111,44 +109,44 @@ void tbl_grow(struct _table_ctx *table)
   ws_free(buckets);
 }
 
-struct _table_slot *tbl_get(struct _table_ctx *table, char *key)
+struct _table_slot *tbl_get(struct _table_ctx *table, ws_val *key)
 {
   struct _table_slot *slot;
   unsigned int hash;
 
-  hash = tbl_hash(key);
+  hash = ws_hash(key);
   slot = table->buckets[hash];
   for (; slot != NULL; slot = slot->next)
-    if (strcmp(slot->key, key) == 0)
+    if (slot->key == key || wval_strict_equal(slot->key, key))
       return slot;
   return NULL;
 }
 
-void tbl_set(struct _table_ctx *table, char *key, wval *data)
+void tbl_set(struct _table_ctx *table, ws_val *key, void *data)
 {
   tbl_grow(table);
 
   struct _table_slot *slot;
   unsigned int hash;
 
-  wval_retain(data);
-
   slot = tbl_get(table, key);
+
   if (slot != NULL)
   {
-    wval_release(slot->v.value);
-    slot->v.value = data;
+    slot->is_delete = 0;
+    slot->value = data;
     return;
   }
 
-  slot = ws_alloc(sizeof(*slot));
-  assert(slot != NULL);
-  slot->key = strdup(key);
-  slot->v.value = data;
-  hash = tbl_hash(slot->key);
+  slot = (struct _table_slot *)ws_alloc(sizeof(*slot));
+  slot->key = key;
+  slot->value = data;
+  slot->is_delete = 0;
+  hash = ws_hash(slot->key);
   slot->next = table->buckets[hash];
   table->buckets[hash] = slot->next;
   ++table->size;
+  wval_retain(key);
 }
 
 void tbl_del(struct _table_ctx *table, ws_val *key)
@@ -159,21 +157,22 @@ void tbl_del(struct _table_ctx *table, ws_val *key)
   unsigned int hash;
 
   slot = tbl_get(table, key);
+
   if (slot != NULL)
   {
-    if (slot->v.is_delete != WTABLE_DEL_MAGIC)
+    if (!slot->is_delete)
     {
-      wval_release(slot->v.value);
-      slot->v.is_delete = WTABLE_DEL_MAGIC;
+      slot->value = NULL;
+      slot->is_delete = 1;
     }
   }
   else
   {
-    slot = ws_alloc(sizeof(*slot));
-    assert(slot != NULL);
-    slot->key = strdup(key);
-    slot->v.is_delete = WTABLE_DEL_MAGIC;
-    hash = tbl_hash(slot->key);
+    slot = (struct _table_slot *)ws_alloc(sizeof(*slot));
+    slot->key = key;
+    slot->is_delete = 1;
+    slot->value = NULL;
+    hash = ws_hash(slot->key);
     slot->next = table->buckets[hash];
     table->buckets[hash] = slot->next;
     ++table->size;
@@ -195,10 +194,9 @@ void table_init(ws_context *ctx, void *mem)
 
 void table_destroy(ws_context *ctx, ws_table *t)
 {
-  struct _wtable_ctx *table;
-  struct _wtable_slot *slot, *tmp;
-  unsigned int i;
-  int j, h;
+  struct _table_ctx *table;
+  struct _table_slot *slot, *tmp;
+  unsigned int i, j, h;
 
   table = NULL;
 
@@ -219,15 +217,13 @@ void table_destroy(ws_context *ctx, ws_table *t)
   if (table == NULL)
     return;
 
-  for (i = 0; i < table->cpacity; ++i)
+  for (i = 0; i < table->capacity; ++i)
   {
     slot = table->buckets[i];
     while (slot != NULL)
     {
-      if (slot->v.is_delete != WTABLE_DEL_MAGIC)
-        wval_release(slot->v.value);
       tmp = slot->next;
-      free(slot->key);
+      wval_release(slot->key);
       free(slot);
       slot = tmp;
     }
@@ -241,68 +237,66 @@ void table_destroy_all_i(ws_context *c, ws_table *t)
 {
   ws_context_list *child, *child2;
 
-  wtable_destroy(c, t);
+  table_destroy(c, t);
   child = c->childs;
 
   for (; child != NULL; child = child->next)
   {
     child2 = child->ctx->childs;
     for (; child2 != NULL; child2 = child2->next)
-      wtable_destroy_all_i(child2->ctx, t);
-    wtable_destroy(child->ctx, t);
+      table_destroy_all_i(child2->ctx, t);
+    table_destroy(child->ctx, t);
   }
 }
 
 void table_destroy_all(ws_table *t)
 {
-  wtable_destroy_all_i(t->ctx, t);
+  table_destroy_all_i(t->ctx, t);
 }
 
-void table_set(ws_context *ctx, ws_table *t, char *key, wval *data)
+void table_set(ws_context *ctx, ws_table *t, ws_val *key, void *data)
 {
-  assert(!ctx->forked);
-  struct _wtable_ctx *table;
+  if (ctx->forked)
+    die("context: Cannot set a value on a table after context is being forked.");
+  struct _table_ctx *table;
   table = ctx_tables_find(ctx, t);
   if (table == NULL)
   {
-    table = malloc(sizeof(*table));
-    assert(table != NULL);
+    table = (struct _table_ctx *)ws_alloc(sizeof(*table));
     table->id = t->id;
     table->size = 0;
-    table->cpacity = 4;
-    table->buckets = malloc(sizeof(struct _wtable_slot *) * 4);
-    assert(table->buckets != NULL);
+    table->capacity = 4;
+    table->buckets = (struct _table_slot **)ws_alloc(sizeof(struct _table_slot *) * 4);
     ctx_tables_insert(ctx, table);
   }
   // Now insert (key, data) to the table.
   tbl_set(table, key, data);
 }
 
-void table_del(ws_context *ctx, ws_table *t, char *key)
+void table_del(ws_context *ctx, ws_table *t, ws_val *key)
 {
+  if (ctx->forked)
+    die("context: Cannot delete a value on a table after context is being forked.");
+
   // DRY.
-  assert(!ctx->forked);
-  struct _wtable_ctx *table;
+  struct _table_ctx *table;
   table = ctx_tables_find(ctx, t);
   if (table == NULL)
   {
-    table = malloc(sizeof(*table));
-    assert(table != NULL);
+    table = (struct _table_ctx *)ws_alloc(sizeof(*table));
     table->id = t->id;
     table->size = 0;
-    table->cpacity = 4;
-    table->buckets = malloc(sizeof(struct _wtable_slot *) * 4);
-    assert(table->buckets != NULL);
+    table->capacity = 4;
+    table->buckets = (struct _table_slot **)ws_alloc(sizeof(struct _table_slot *) * 4);
     ctx_tables_insert(ctx, table);
   }
   tbl_del(table, key);
 }
 
-ws_val *table_get(ws_context *ctx, ws_table *t, char *key)
+void *table_get(ws_context *ctx, ws_table *t, ws_val *key)
 {
-  assert(!ctx->forked);
-  struct _wtable_ctx *table;
-  struct _wtable_slot *slot;
+  struct _table_ctx *table;
+  struct _table_slot *slot;
   ws_context *current_ctx;
 
   current_ctx = ctx;
@@ -315,9 +309,9 @@ ws_val *table_get(ws_context *ctx, ws_table *t, char *key)
     slot = tbl_get(table, key);
     if (slot == NULL)
       continue;
-    if (slot->v.is_delete == WTABLE_DEL_MAGIC)
+    if (slot->is_delete)
       return NULL;
-    return slot->v.value;
+    return slot->value;
   }
 
   return NULL;
