@@ -7,6 +7,10 @@ import { Compiler, CompiledData } from "./src/compiler";
 
 const source = `
 2 + 3;
+
+const x = function () {
+  return 0 + 1 * 5.3;
+}
 `;
 
 // Generate the C file.

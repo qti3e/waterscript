@@ -29,10 +29,12 @@ int main()
   ws_utf8 *data = ws_string_to_utf8(context_resolve(ctx, key));
   write(1, &data->data, data->size);
 
-  ws_function *fn = get_function(0, ctx->scope);
-  printf("%zu\n", fn->data->constant_pool_offset);
-
+  ws_function *fn = get_function(1, ctx->scope);
   dump_code(fn->data);
 
-  printf("End\n");
+  double num = 5.3;
+  for (size_t i = 0; i < sizeof(num); ++i)
+    printf(" %#04x", ((char *)&num)[i]);
+
+  printf("\nEnd\n");
 }

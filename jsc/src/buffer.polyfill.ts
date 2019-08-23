@@ -8,6 +8,8 @@
 
 import { global } from "./util";
 
+const littleEndian = true;
+
 class WSBufferPolyFill implements WSBuffer {
   private ab: ArrayBuffer;
   private u8: Uint8Array;
@@ -67,67 +69,67 @@ class WSBufferPolyFill implements WSBuffer {
 
   setUint16(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 2);
-    this.view.setUint16(cursor, number);
+    this.view.setUint16(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 2;
   }
 
   getUint16(cursor: number): number {
-    return this.view.getUint16(cursor);
+    return this.view.getUint16(cursor, littleEndian);
   }
 
   setUint32(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 4);
-    this.view.setUint32(cursor, number);
+    this.view.setUint32(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 4;
   }
 
   getUint32(cursor: number): number {
-    return this.view.getUint32(cursor);
+    return this.view.getUint32(cursor, littleEndian);
   }
 
   setInt16(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 2);
-    this.view.setInt16(cursor, number);
+    this.view.setInt16(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 2;
   }
 
   getInt16(cursor: number): number {
-    return this.view.getInt16(cursor);
+    return this.view.getInt16(cursor, littleEndian);
   }
 
   setInt32(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 4);
-    this.view.setInt32(cursor, number);
+    this.view.setInt32(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 4;
   }
 
   getInt32(cursor: number): number {
-    return this.view.getInt32(cursor);
+    return this.view.getInt32(cursor, littleEndian);
   }
 
   setFloat32(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 4);
-    this.view.setFloat32(cursor, number);
+    this.view.setFloat32(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 4;
   }
 
   getFloat32(cursor: number): number {
-    return this.view.getFloat32(cursor);
+    return this.view.getFloat32(cursor, littleEndian);
   }
 
   setFloat64(number: number, cursor: number = this.cursor): void {
     this.resizeOnWrite(cursor, 8);
-    this.view.setFloat64(cursor, number);
+    this.view.setFloat64(cursor, number, littleEndian);
     if (arguments.length === 1) this.cursor += 8;
   }
 
   getFloat64(cursor: number): number {
-    return this.view.getFloat64(cursor);
+    return this.view.getFloat64(cursor, littleEndian);
   }
 
   private writeString(data: string, cursor: number): void {
     for (let i = 0; i < data.length; ++i) {
-      this.view.setUint16(cursor + i * 2, data.charCodeAt(i));
+      this.view.setUint16(cursor + i * 2, data.charCodeAt(i), littleEndian);
     }
   }
 
@@ -135,7 +137,7 @@ class WSBufferPolyFill implements WSBuffer {
     if (length === 0) return "";
     const chars: number[] = [];
     for (let i = 0; i < length; ++i) {
-      chars.push(this.view.getUint16(cursor + i * 2));
+      chars.push(this.view.getUint16(cursor + i * 2, littleEndian));
     }
     return chars.map(ch => String.fromCharCode(ch)).join("");
   }
@@ -143,26 +145,26 @@ class WSBufferPolyFill implements WSBuffer {
   setNetString16(data: string, cursor: number = this.cursor): void {
     const writeLen = 2 + data.length * 2;
     this.resizeOnWrite(cursor, writeLen);
-    this.view.setUint16(cursor, data.length);
+    this.view.setUint16(cursor, data.length, littleEndian);
     this.writeString(data, cursor + 2);
     if (arguments.length === 1) this.cursor += writeLen;
   }
 
   getNetString16(cursor: number): string {
-    const len = this.view.getUint16(cursor);
+    const len = this.view.getUint16(cursor, littleEndian);
     return this.readString(len, cursor + 2);
   }
 
   setNetString32(data: string, cursor: number = this.cursor): void {
     const writeLen = 4 + data.length * 2;
     this.resizeOnWrite(cursor, writeLen);
-    this.view.setUint32(cursor, data.length);
+    this.view.setUint32(cursor, data.length, littleEndian);
     this.writeString(data, cursor + 4);
     if (arguments.length === 1) this.cursor += writeLen;
   }
 
   getNetString32(cursor: number): string {
-    const len = this.view.getUint32(cursor);
+    const len = this.view.getUint32(cursor, littleEndian);
     return this.readString(len, cursor + 4);
   }
 }
