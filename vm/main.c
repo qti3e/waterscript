@@ -3,6 +3,7 @@
 #include <locale.h>
 #include "context.h"
 #include "wval.h"
+#include "utf8.h"
 
 int main()
 {
@@ -12,31 +13,15 @@ int main()
   context_new_scope(ctx, 0);
 
   ws_val key1 = {.type = WVAL_TYPE_SYMBOL, .data.symbol.id = 1, .ref_count = 0};
-  ws_val key2 = {.type = WVAL_TYPE_SYMBOL, .data.symbol.id = 2, .ref_count = 0};
 
-  ws_val val = {
-      .type = WVAL_TYPE_NUMBER,
-      .ref_count = 1,
-      .data.number = 3.6};
+  char16_t wcs[] = u"سلام X A 🍌\n"; // or "z\u00df\u6c34\U0001f34c"
 
-  ws_val val2 = {
-      .type = WVAL_TYPE_NUMBER,
-      .ref_count = 1,
-      .data.number = 6};
+  ws_val *val = ws_string(wcs, sizeof(wcs));
 
-  context_define(ctx, &key1, &val, 1);
-  context_define(ctx, &key2, &val2, 1);
+  context_define(ctx, &key1, val, 1);
 
-  table_del(ctx, &ctx->scope->table, &key1);
-  context_define(ctx, &key1, &val, 1);
+  ws_utf8 *data = ws_string_to_utf8(val);
+  write(1, &data->data, data->size);
 
-  ws_val *value = context_resolve(ctx, &key1);
-  if (value == NULL)
-  {
-    printf("NULL\n");
-  }
-  else if (value->type == WVAL_TYPE_NUMBER)
-  {
-    printf("Num %f\n", value->data.number);
-  }
+  printf("End\n");
 }

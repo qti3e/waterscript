@@ -200,4 +200,9 @@ void wval_release(ws_val *value);
  */
 int wval_strict_equal(ws_val *v1, ws_val *v2);
 
+/**
+ * Create a new WaterScript string.
+ */
+ws_val *ws_string(char16_t *data, size_t size);
+
 #endif

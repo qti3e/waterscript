@@ -1,4 +1,5 @@
 #include "wval.h"
+#include "alloc.h"
 
 void wval_retain(ws_val *value)
 {
@@ -60,4 +61,13 @@ int wval_strict_equal(ws_val *v1, ws_val *v2)
         return 0;
     return 1;
   }
+}
+
+ws_val *ws_string(char16_t *data, size_t size)
+{
+  ws_val *string = (ws_val *)ws_alloc(sizeof(*string));
+  string->type = WVAL_TYPE_STRING;
+  string->data.string.data = data;
+  string->data.string.size = size;
+  return string;
 }

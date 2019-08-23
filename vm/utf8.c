@@ -22,8 +22,8 @@ static int xmlLittleEndian = 1;
  *     The value of *inlen after return is the number of octets consumed
  *     as the return value is positive, else unpredictiable.
  */
-int UTF16LEToUTF8(unsigned char *out, size_t *outlen,
-                  const unsigned char *inb, size_t *inlenb)
+int UTF16LEToUTF8(unsigned char *out, int *outlen,
+                  const unsigned char *inb, int *inlenb)
 {
   unsigned char *outstart = out;
   const unsigned char *processed = inb;
@@ -122,8 +122,8 @@ int UTF16LEToUTF8(unsigned char *out, size_t *outlen,
 
 ws_utf8 *ws_string_to_utf8(ws_val *string)
 {
-  size_t input_size = string->data.string.size;
-  size_t output_size = input_size;
+  int input_size = string->data.string.size;
+  int output_size = input_size;
   ws_utf8 *utf8 = (ws_utf8 *)malloc(output_size);
   if (utf8 == NULL)
     die("ws_string_to_utf8: Memory allocation failed.");
@@ -131,5 +131,6 @@ ws_utf8 *ws_string_to_utf8(ws_val *string)
   UTF16LEToUTF8((unsigned char *)(&utf8->data), &output_size,
                 (unsigned char *)string->data.string.data, &input_size);
 
+  utf8->size = output_size;
   return utf8;
 }
