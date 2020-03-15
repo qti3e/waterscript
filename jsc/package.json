@@ -6,7 +6,7 @@
   "devDependencies": {
     "@types/acorn": "^4.0.5",
     "@types/estree": "^0.0.39",
-    "acorn": "^6.2.1",
+    "acorn": "^6.4.1",
     "liltest": "^0.0.5",
     "rollup": "^1.17.0",
     "rollup-plugin-node-resolve": "^5.2.0",
